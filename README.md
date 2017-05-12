@@ -39,4 +39,34 @@ as follows:
       provides the API to sysadmin
     - [yaml-cpp](https://github.com/jbeder/yaml-cpp) provides YAML config file support
 
-More docs are to come
+About
+=====
+
+sysadmin's main goal is to be a system configuration manager. It accomplishes that
+by providing a typed key value database, on which you the user can create "hooks".
+These hooks allow you to do one or both of the following things, in response to
+keys or groups of keys changing their values:
+    1) Render jinja2 based templates and save them to the system
+    2) Run arbitrary scripts
+
+For example, say you have a set of keys whose values reflect dhcp settings:
+
+```
+network.dhcp.endip = "192.168.99.200"
+network.dhcp.lease = 720
+network.dhcp.router_ip = "192.168.99.1"
+network.dhcp.router_netmask = "255.255.255.0"
+network.dhcp.startip = "192.168.99.100"
+network.dhcp.static_assignments = []
+```
+
+Two hooks exist to service these keys:
+    1) A jinja2 template which renders a [dnsmasq](http://www.thekelleys.org.uk/dnsmasq/doc.html)
+       configuration file which reflects the current values
+    2) A simple redirection script which knows to restart the dnsmasq
+       service via systemd.
+
+sysadmin allows you to change the value of one or more of these keys, then `commit` them
+all at once, at which point the 2 hooks above are run. From a user's perspective, they need
+only know what values they want, and sysadmin takes care of the messy, system level details
+via its hooks.
