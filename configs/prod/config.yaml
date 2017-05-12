@@ -1,0 +1,7 @@
+---
+# hook-config: /etc/sysadmin/hooks.yaml # if you don't have a hooks.yaml file here, sysadmin is just a kv store
+log4cxx-config: /etc/sysadmin/log4cxx.config
+host: 127.0.0.1 # sysadmin has no auth, so consider only allowing access to it via localhost
+port: 4000
+storage-path: /var/sysadmin/
+history-storage: /var/sysadminHistory/

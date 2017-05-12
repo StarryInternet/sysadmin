@@ -1,0 +1,15 @@
+syntax = "proto2";
+package testpb;
+
+message TestOneof {
+    oneof payload {
+        int32 a = 1;
+        int64 b = 2;
+        uint32 c = 3;
+        uint64 d = 4;
+        float e = 5;
+        double f = 6;
+        bool g = 7;
+        string h = 8;
+    }
+}

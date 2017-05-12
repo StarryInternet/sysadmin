@@ -1,0 +1,46 @@
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+
+# Fortran module files
+*.mod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# random stuff
+bin/
+.vagrant
+.DS_Store
+third-party/gtest-*
+third-party/gmock-*
+gtest-*.zip
+gmock-*.zip
+coverage/
+lcov-report.info
+generated/
+scripts/venv
+*.pyc
+*.egg-info
+
+build/
+scripts/build/

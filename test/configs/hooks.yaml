@@ -1,0 +1,27 @@
+templater_path: "scripts/templater.py"
+templates:
+    [
+        {
+            name: test.conf,
+            template_location: test/configs/templates/test.tmpl,
+            destination: test.conf,
+            hooks:
+                [
+                    network.dhcp.*,
+                ]
+        }
+    ]
+services:
+    [
+        {
+            name: testService,
+            script: test/argdumper.py,
+            hooks:
+                [
+                    network.dhcp.startip,
+                    network.dhcp.endip,
+                    network.dhcp.interfaces,
+                    my.service.restarter
+                ]
+        }
+    ]

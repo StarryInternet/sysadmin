@@ -1,0 +1,159 @@
+syntax = "proto2";
+package sysadminctl;
+
+message Int32List {
+    repeated int32 list = 1;
+}
+
+message BoolList {
+    repeated bool list = 1;
+}
+
+message StringList {
+    repeated string list = 1;
+}
+
+message ConfigValue {
+    oneof value {
+        int32 int32val = 1;
+        string strval = 2;
+        bool boolval = 3;
+        Int32List int32list = 4;
+        BoolList boollist = 5;
+        StringList stringlist = 6;
+    }
+}
+
+message Set {
+    required string key = 1;
+    required ConfigValue value = 2;
+}
+
+message Get {
+    required string key = 1;
+}
+
+enum CommitConfig {
+    DEFAULT = 0;
+    TEMPLATE_ONLY = 1;
+    NO_HOOKS = 3;
+}
+
+message Commit {
+    optional CommitConfig config = 1;
+}
+
+message Drop {
+}
+
+message FireHooks {
+}
+
+message Rollback {
+    required uint32 id = 1;
+}
+
+message EraseKey {
+    required string key = 1;
+}
+
+message Reset {
+}
+
+message DumpHooks {
+}
+
+message TriggerHook {
+    required string hook = 1;
+}
+
+message Blame {
+    required string key = 1;
+}
+
+message InFlight {
+}
+
+message Command {
+    oneof payload {
+        Set set = 1;
+        Get get = 2;
+        Commit commit = 3;
+        Drop drop = 4;
+        FireHooks firehooks = 7;
+        EraseKey erase = 8;
+        Rollback rollback = 11;
+        Reset reset = 12;
+        DumpHooks dump = 13;
+        TriggerHook trigger = 14;
+        Blame blame = 15;
+        InFlight inflight = 16;
+    }
+    required uint32 id = 6;
+    optional uint32 xid = 10;
+}
+
+enum StatusCode {
+    SUCCESS = 0;
+    UNKNOWN_ERROR = 1;
+    TYPE_MISMATCH = 2;
+    COMMAND_TRANSLATION_ERROR = 3;
+    KEY_NOT_FOUND = 4;
+    EXTERNAL_PROCESS_ERROR = 5;
+    INVALID_KEY = 6;
+    FAILED_ROLLBACK = 7;
+    LOCKED_QUEUE = 8;
+    HOOK_NOT_FOUND = 9;
+    SUCCESS_KEY_CREATED = 10;
+    MESSAGE_SIZE_ERROR = 11;
+}
+
+message MappedField {
+    required string key = 1;
+    optional ConfigValue value = 2;
+}
+
+message GetResponse {
+    repeated MappedField kvs = 1;
+}
+
+message CommitResponse {
+    required uint32 commit_id = 1;
+}
+
+message ResetResponse {
+    optional uint32 commit_id = 1;
+}
+
+message DumpResponse {
+    repeated string templatehooks = 1;
+    repeated string servicehooks = 2;
+}
+
+message BlameEntry {
+    required uint32 commit_id = 1;
+    required string commit_time = 2;
+    required ConfigValue val = 3;
+}
+
+message BlameResponse {
+    required string key = 1;
+    repeated BlameEntry entries = 2;
+}
+
+message InFlightResponse {
+    repeated MappedField kvs = 1;
+}
+
+message Response {
+    oneof payload {
+        GetResponse get = 1;
+        CommitResponse commit = 2;
+        ResetResponse reset = 3;
+        DumpResponse dump = 4;
+        BlameResponse blame = 5;
+        InFlightResponse inflight = 8;
+    }
+    required uint32 id = 6;
+    required StatusCode status = 7;
+}

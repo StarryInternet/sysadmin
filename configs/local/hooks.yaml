@@ -1,0 +1,23 @@
+templater_path: "/path/to/templater.py" # templater.py is provided by sysadmin, and just needs to be installed
+# Template section. All templates are created first, and must succeed to be created in order to move onto services
+templates:
+    -   name: template_dest.conf
+        template_location: template.tmpl
+        destination: template_dest.conf
+        arguments: # You can pass arbitrary arguments to templates
+            - arg1
+            - arg2
+        hooks:
+            - system.key
+            - system.many_keys.*
+# arbitrary services/scripts which are run based on keys changing.
+services:
+    -   name: service # All names, accross templates and services, must be unique. These names can be used to refer to templates/services externally
+        script: /path/to/service-thing.sh
+        arguments: # You can also pass arbitrary arguments to services
+            - arg1
+            - arg2
+        runlevel: 9 # runlevel defines the ordering of how services are run, in run level order
+        hooks:
+            - system.key
+            - system.many_keys.*

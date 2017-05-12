@@ -1,0 +1,35 @@
+syntax = "proto2";
+package testrpc;
+
+message Echo {
+    required string data = 1;
+}
+
+message SucceedRequest {}
+
+message ErrorRequest {}
+
+message NoHandlerRequest {}
+
+message ThrowRequest {}
+
+message Request {
+    oneof operation {
+        Echo echo = 1;
+        SucceedRequest succeed = 2;
+        ErrorRequest error = 3;
+        NoHandlerRequest no_handler = 4;
+        ThrowRequest throw = 5;
+    }
+}
+
+message Reply {
+    enum Status {
+        ERROR = -128;
+        SUCCESS = 0;
+    }
+    required Status status = 1;
+    oneof extended {
+        Echo echo = 2;
+    }
+}

@@ -1,0 +1,46 @@
+From aa928b925bdc090f0289342ea2cc56ea6ee73a88 Mon Sep 17 00:00:00 2001
+From: bdutro <brett.dutro@gmail.com>
+Date: Wed, 1 Apr 2015 16:58:44 -0500
+Subject: [PATCH 08/11] Update node_data::remove to use new equals() method
+
+- Update the call to equals() in node_data::remove() to match the new implementation
+- Add unit test for node::remove() to catch this type of bug in the future
+---
+ include/yaml-cpp/node/detail/impl.h | 2 +-
+ test/node/node_test.cpp             | 7 +++++++
+ 2 files changed, 8 insertions(+), 1 deletion(-)
+
+diff --git a/include/yaml-cpp/node/detail/impl.h b/include/yaml-cpp/node/detail/impl.h
+index f997e02..f6d218c 100644
+--- a/include/yaml-cpp/node/detail/impl.h
++++ b/include/yaml-cpp/node/detail/impl.h
+@@ -133,7 +133,7 @@ inline bool node_data::remove(const Key& key, shared_memory_holder pMemory) {
+     return false;
+ 
+   for (node_map::iterator it = m_map.begin(); it != m_map.end(); ++it) {
+-    if (equals(*it->first, key, pMemory)) {
++    if (it->first->equals(key, pMemory)) {
+       m_map.erase(it);
+       return true;
+     }
+diff --git a/test/node/node_test.cpp b/test/node/node_test.cpp
+index f54fcc9..03ad782 100644
+--- a/test/node/node_test.cpp
++++ b/test/node/node_test.cpp
+@@ -39,6 +39,13 @@ TEST(NodeTest, SimpleAppendSequence) {
+   EXPECT_TRUE(node.IsSequence());
+ }
+ 
++TEST(NodeTest, MapElementRemoval) {
++  Node node;
++  node["foo"] = "bar";
++  node.remove("foo");
++  EXPECT_TRUE(!node["foo"]);
++}
++
+ TEST(NodeTest, SimpleAssignSequence) {
+   Node node;
+   node[0] = 10;
+-- 
+2.2.1
+

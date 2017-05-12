@@ -1,0 +1,8 @@
+A jinja2 template, rendered via templater.py
+
+You have access to _any_ variable inside sysadmin via the "values" dict
+{{ values["network"]["dhcp"]["interface"] }}
+
+Arguments set in the hooks.yaml file are passed to templates via the
+"args" list:
+arg0: {{ args[0] }}

@@ -1,0 +1,5 @@
+dhcp-range={{ values["network"]["dhcp"]["startip"] }},{{ values["network"]["dhcp"]["endip"] }},{{ values["network"]["dhcp"]["lease"] }}
+dhcp-authoritative
+interfaces={% for interface in values["network"]["dhcp"]["interfaces"] %}{{ interface }},{% endfor %}
+
+breakfast={{ values["network"]["dhcp"]["breakfast"] }}

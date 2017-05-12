@@ -1,0 +1,30 @@
+# new: nest new values here, in the same fashion as factory settings
+new:
+    key:
+        "1": "new"
+    goodbye:
+        key: "goingaway"
+
+# default: nest default values here, in the same fashion as factory settings
+# These keys cannot be erased via wildcards.
+default:
+    key:
+        "2": "This is a default value"
+
+# valuechange: nest keys that exist, but are receiving new values
+valuechange:
+    key:
+        "1": "value"
+
+# typechange: explicitly list keys with their new types
+typechange:
+    key:
+        "1": "int32list"
+
+# rename: explicitly list keys with their new name
+rename:
+    - "key.1": "key.2"
+
+# remove: explicitly list keys being removed, in a list
+remove:
+    - "goodbye.key"

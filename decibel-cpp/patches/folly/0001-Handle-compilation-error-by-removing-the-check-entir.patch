@@ -1,0 +1,32 @@
+From 366058b42350390eef5f8e403a11d41bda8404f8 Mon Sep 17 00:00:00 2001
+From: Eric Brown <ebrown@projectdecibel.com>
+Date: Mon, 31 Aug 2015 12:14:08 -0400
+Subject: [PATCH] "Handle" compilation error by removing the check entirely
+
+As explained in the comment in the code, we don't use fbvectors,
+or boost::shared_ptrs, so removing this check doesn't seem that
+dangerous, and I can't for the life of me figure out why this
+errors out in the first place
+---
+ folly/Traits.h | 5 ++++-
+ 1 file changed, 4 insertions(+), 1 deletion(-)
+
+diff --git a/folly/Traits.h b/folly/Traits.h
+index 0a29102..d4259cb 100644
+--- a/folly/Traits.h
++++ b/folly/Traits.h
+@@ -430,7 +430,10 @@ FOLLY_ASSUME_FBVECTOR_COMPATIBLE_1(std::shared_ptr);
+ FOLLY_ASSUME_FBVECTOR_COMPATIBLE_1(std::function);
+ 
+ // Boost
+-FOLLY_ASSUME_FBVECTOR_COMPATIBLE_1(boost::shared_ptr);
++// This check breaks for decibel-cpp when we include boost::signals, for some
++// unknown reason. Due to the fact that we don't use boost::shared_ptrs or
++// fbvectors, I feel save removing this check
++// FOLLY_ASSUME_FBVECTOR_COMPATIBLE_1(boost::shared_ptr);
+ 
+ #define FOLLY_CREATE_HAS_MEMBER_TYPE_TRAITS(classname, type_name) \
+   template <typename T> \
+-- 
+2.2.1
+

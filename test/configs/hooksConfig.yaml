@@ -1,0 +1,6 @@
+---
+log4cxx-config: ./test/configs/log4cxx.config
+port: 4000
+storage-path: ./test/tmp
+hook-config: ./test/configs/hooks.yaml
+history-storage: ./test/historyTmp
