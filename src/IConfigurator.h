@@ -12,6 +12,8 @@
 #include <map>
 #include <boost/optional.hpp>
 
+#include <folly/Format.h>
+
 class IConfigurator
 {
 public:
@@ -48,3 +50,36 @@ public:
 
     virtual ConfigPairList InFlightItems(ClientId clientId) = 0;
 };
+
+namespace folly
+{
+
+template<>
+class FormatValue<IConfigurator*>
+{
+public:
+    explicit FormatValue(IConfigurator* pConfigurator)
+      : mpConfigurator(pConfigurator)
+    {}
+
+    template <class FormatCallback>
+    void format(FormatArg& arg, FormatCallback& cb) const
+    {
+        while (arg.splitKey<true>().str().size() > 0);
+        auto key = ConfigPair::Key(arg.fullArgString.str());
+        auto maybeVal = mpConfigurator->Get(key);
+        if (maybeVal.size() > 0)
+        {
+            FormatValue<std::string>(maybeVal.at(key).GetValue().ToString()).format(arg, cb);
+        }
+        else
+        {
+            FormatValue<std::string>("").format(arg, cb);
+        }
+    }
+
+private:
+    IConfigurator* mpConfigurator;
+};
+
+} // folly

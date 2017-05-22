@@ -355,3 +355,18 @@ TEST_F(TestConfiguratorFixture, InFlightItems)
     auto items2 = conf.InFlightItems(0);
     ASSERT_EQ(0, items2.size());
 }
+
+TEST_F(TestConfiguratorFixture, FollyFormatting)
+{
+    Configurator conf(&mStorage, &mTransactions, 2);
+
+    conf.Set(ConfigPair("wireless.waffle", ConfigType<std::string>("cheesywaffle")), 0);
+    conf.Set(ConfigPair("wireless.cheese", ConfigType<bool>(true)), 0);
+    conf.Set(ConfigPair("wireless.dynamite.explode", ConfigType<int32_t>(5)), 0);
+    conf.Commit(0);
+
+    ASSERT_EQ("cheesywaffle", folly::svformat("{wireless.waffle}", (IConfigurator*)(&conf)));
+    ASSERT_EQ("true", folly::svformat("{wireless.cheese}", (IConfigurator*)(&conf)));
+    ASSERT_EQ("5", folly::svformat("{wireless.dynamite.explode}", (IConfigurator*)(&conf)));
+    ASSERT_EQ("", folly::svformat("{notreal}", (IConfigurator*)(&conf)));
+}
