@@ -49,6 +49,11 @@ public:
 
     HookUser& operator=(HookUser source);
 
+    // TODO For dynamic wildcard hooks, this pattern should change. Instead of the
+    // HookManager finding all the hook users that need to run, then running them
+    // via the HookUser as is done here, the HookManager should call into the HookUsers
+    // to "generate" a list of all hooks that need to be. That way, a HookUser
+    // can create multiple hooks that need to be executed individually
     folly::Future<folly::Unit> ExecuteExternalProcess() const;
 
     bool HasHook(const ConfigPair::Key& key) const;

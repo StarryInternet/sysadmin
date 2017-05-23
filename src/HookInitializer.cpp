@@ -26,6 +26,9 @@ std::shared_ptr<HookManager> HookManagerFactory(FullHooksConfig config,
 {
     std::unique_ptr<HookTable> pTable(new HookTable);
 
+    // TODO Realistically, there should be no internal difference between templates and services.
+    // Templates should probably all be run first, so you could service the existing structure
+    // of the hooks.yaml file by just having all templates be runlevel 0
     for (const auto& templateConfig : config.mTemplates)
     {
         auto templaterRunner = std::make_shared<TemplaterRunner>(reactor, config.mTemplaterPath,
