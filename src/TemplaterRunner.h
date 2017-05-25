@@ -16,4 +16,6 @@ public:
                     const boost::filesystem::path& renderedPath,
                     const std::vector<std::string>& arguments);
 
+    virtual IExternalRunner::Arguments
+    SpecializeArguments(const IExternalRunner::Arguments& unspecialized) const;
 };

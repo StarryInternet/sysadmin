@@ -6,6 +6,6 @@
 
 #include <vector>
 
-IExternalRunner::FormattedValues FormatKeys(const ConfigPairList& values);
+IExternalRunner::Arguments FormatKeys(const ConfigPairList& values);
 
 std::string UnderscoreKey(const std::string& key);

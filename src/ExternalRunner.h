@@ -23,7 +23,9 @@ public:
                    const std::vector<std::string>& leadingArgs,
                    HookOptions::RunOptions options);
 
-    virtual folly::Future<folly::Unit> Run(const IExternalRunner::FormattedValues& values) const;
+    virtual folly::Future<folly::Unit> Run(const IExternalRunner::Arguments& values) const;
+
+    virtual IExternalRunner::Arguments SpecializeArguments(const IExternalRunner::Arguments& unspecialized) const;
 
 private:
     mutable decibel::messaging::Reactor* mReactor;

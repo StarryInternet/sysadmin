@@ -9,8 +9,8 @@
 class IExternalRunner
 {
 public:
-    typedef std::vector<std::string> FormattedValues;
+    typedef std::vector<std::string> Arguments;
 
 public:
-    virtual folly::Future<folly::Unit> Run(const FormattedValues& values) const = 0;
+    virtual folly::Future<folly::Unit> Run(const Arguments& values) const = 0;
 };

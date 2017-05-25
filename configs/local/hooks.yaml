@@ -21,3 +21,9 @@ services:
         hooks:
             - system.key
             - system.many_keys.*
+    -   name: thing
+        script: script.py
+        arguments:
+            - '--ipaddr {network.*.ip_address}'
+        hooks:
+            - network.*

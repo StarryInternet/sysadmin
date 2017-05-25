@@ -14,7 +14,6 @@ set(SYSADMIN_SOURCE_FILES
     HookManager.cpp
     HookTable.cpp
     HookUser.cpp
-    KeyValueFormatter.cpp
     LocalHistoryStorage.cpp
     LocalYAMLStorage.cpp
     LockedConfigPairMap.cpp

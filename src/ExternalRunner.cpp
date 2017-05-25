@@ -25,7 +25,7 @@ ExternalRunner::ExternalRunner(dm::Reactor* reactor, const std::vector<std::stri
 {
 }
 
-folly::Future<folly::Unit> ExternalRunner::Run(const IExternalRunner::FormattedValues& values) const
+folly::Future<folly::Unit> ExternalRunner::Run(const IExternalRunner::Arguments& values) const
 {
     std::stringstream basic_process;
     for (const auto& c : mLeadingArgs)
@@ -35,12 +35,15 @@ folly::Future<folly::Unit> ExternalRunner::Run(const IExternalRunner::FormattedV
     const std::string basic_process_str = basic_process.str();
     LOG4CXX_INFO(spLogger, "Running external process: " << basic_process_str);
 
-    HookOptions::RunOptions options_copy = mRunOptions;
     std::vector<std::string> cmd(mLeadingArgs.begin(), mLeadingArgs.end());
-    cmd.insert(cmd.end(), values.begin(), values.end());
+    auto specialized_args = SpecializeArguments(values);
+    cmd.insert(cmd.end(), specialized_args.begin(), specialized_args.end());
+
     mSubproc.reset(new dn::FutureSubprocess(mReactor->GetEventLoop(),
                                             cmd,
                                             ConvertOptions(mRunOptions)));
+
+    HookOptions::RunOptions options_copy = mRunOptions;
     return mSubproc->RunSubprocess()
         .then([basic_process_str]
         {
@@ -79,6 +82,12 @@ folly::Future<folly::Unit> ExternalRunner::Run(const IExternalRunner::FormattedV
             LOG4CXX_ERROR(spLogger, "stderr from err'd process: " << stderr.str());
             throw ExternalRunnerError(err.what());
         });
+}
+
+IExternalRunner::Arguments
+ExternalRunner::SpecializeArguments(const IExternalRunner::Arguments& unspecialized) const
+{
+    return unspecialized;
 }
 
 dn::SubprocessHandler::SubprocessOptions ConvertOptions(HookOptions::RunOptions options)

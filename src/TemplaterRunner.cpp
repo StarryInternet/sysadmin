@@ -20,34 +20,26 @@ TemplaterRunner::TemplaterRunner(dm::Reactor* reactor,
                                  const std::vector<std::string>& arguments)
     : ExternalRunner(
         reactor,
-        CombineArguments (
-            {
-                scriptPath.string(),
-                templatePath.string(),
-                renderedPath.string()
-            },
-            arguments
-        ),
+        {
+            scriptPath.string(),
+            templatePath.string(),
+            renderedPath.string()
+        },
         HookOptions::RunOptions::DEFAULT
     )
 {
 }
 
-std::vector<std::string>
-CombineArguments(const std::vector<std::string>& paths,
-                 const std::vector<std::string>& arguments)
+IExternalRunner::Arguments
+TemplaterRunner::SpecializeArguments(const IExternalRunner::Arguments& unspecialized) const
 {
     std::vector<std::string> fullArgs;
-    fullArgs.insert(fullArgs.end(),
-                    paths.begin(),
-                    paths.end());
-    if (arguments.size() > 0)
+    if (unspecialized.size() > 0)
     {
         fullArgs.emplace_back("--template-args");
         fullArgs.insert(fullArgs.end(),
-                        arguments.begin(),
-                        arguments.end());
+                        unspecialized.begin(),
+                        unspecialized.end());
     }
-    fullArgs.emplace_back("--committed");
     return fullArgs;
 }
