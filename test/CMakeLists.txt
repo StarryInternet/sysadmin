@@ -14,6 +14,7 @@ set(TEST_SOURCES
     test_local_yaml_storage.cpp
     test_main.cpp
     test_memory_cache.cpp
+    test_pass_through_configurator.cpp
     test_protobuf_translator.cpp
     test_service_script_runner.cpp
     test_size_age_bound_map.cpp

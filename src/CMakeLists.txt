@@ -19,6 +19,7 @@ set(SYSADMIN_SOURCE_FILES
     LocalYAMLStorage.cpp
     LockedConfigPairMap.cpp
     MemoryCache.cpp
+    PassThroughConfigurator.cpp
     ProtobufTranslator.cpp
     ServiceScriptRunner.cpp
     SysAdminConfig.cpp
