@@ -56,7 +56,7 @@ class MockSystemStorage : public IConfigurator
 public:
     MockSystemStorage()
       : mStorage()
-      , mInFlightItems(100, this)
+      , mInFlightItems(100)
     {
     }
 
@@ -69,25 +69,10 @@ public:
     ConfigPairMap Get(const ConfigPair::Key& key) const
     {
         ConfigPairMap output;
-        if (key.IsWildcard())
+        auto res = InternalGet(key);
+        if (res)
         {
-            auto subKeys = GetAllKeys(key);
-            for (const auto& subkey : subKeys)
-            {
-                auto res = InternalGet(subkey);
-                if (res)
-                {
-                    output.emplace(subkey, res.get());
-                }
-            }
-        }
-        else
-        {
-            auto res = InternalGet(key);
-            if (res)
-            {
-                output.emplace(key, res.get());
-            }
+            output.emplace(key, res.get());
         }
 
         return output;

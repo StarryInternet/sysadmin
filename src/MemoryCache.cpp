@@ -8,7 +8,7 @@ namespace dm = decibel::messaging;
 MemoryCache::MemoryCache(IConfigurator* backingStore)
   : mBackingStore(backingStore)
   , mValues()
-  , mInFlightItems(100, this)
+  , mInFlightItems(100)
 {
     auto allValues = mBackingStore->GetAll();
     for (const auto& value : allValues)

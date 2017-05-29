@@ -3,6 +3,7 @@
 
 #include "ConfigTypes.h"
 #include "Configurator.h"
+#include "WildcardConfigurator.h"
 #include "ExternalRunner.h"
 
 #include "Helpers.h"
@@ -19,13 +20,15 @@ class TestConfiguratorFixture : public ::testing::Test
 public:
     TestConfiguratorFixture()
       : ::testing::Test()
-      , mStorage()
+      , mBackingStore()
+      , mStorage(&mBackingStore)
       , mTransactions()
     {
 
     }
 
-    MockSystemStorage mStorage;
+    MockSystemStorage mBackingStore;
+    WildcardConfigurator mStorage;
     MockTransactionStorage mTransactions;
 };
 
@@ -34,9 +37,9 @@ TEST_F(TestConfiguratorFixture, BasicInteraction)
     Configurator conf(&mStorage, &mTransactions);
 
     conf.Set(ConfigPair("ssid", ConfigType<std::string>("cheesywaffle")), 0);
-    ASSERT_FALSE(mStorage.ValueExists("ssid"));
+    ASSERT_FALSE(mBackingStore.ValueExists("ssid"));
     conf.Commit(0);
-    ASSERT_TRUE(mStorage.ValueExists("ssid"));
+    ASSERT_TRUE(mBackingStore.ValueExists("ssid"));
 }
 
 TEST_F(TestConfiguratorFixture, MoreInteraction)
@@ -49,9 +52,9 @@ TEST_F(TestConfiguratorFixture, MoreInteraction)
     conf.Commit(0);
 
     conf.Set(ConfigPair("wireless.dynamite.explode", ConfigType<int32_t>(8)), 0);
-    ASSERT_TRUE(mStorage.ValueExists("wireless.waffle"));
-    ASSERT_TRUE(mStorage.ValueExists("wireless.cheese"));
-    ASSERT_TRUE(mStorage.ValueExists("wireless.dynamite.explode"));
+    ASSERT_TRUE(mBackingStore.ValueExists("wireless.waffle"));
+    ASSERT_TRUE(mBackingStore.ValueExists("wireless.cheese"));
+    ASSERT_TRUE(mBackingStore.ValueExists("wireless.dynamite.explode"));
     ASSERT_EQ(5, UnwrapSinglePair(conf.Get(ConfigPair::Key("wireless.dynamite.explode"))).get().UnpackValue<int32_t>());
 
     conf.Commit(0);
@@ -91,8 +94,8 @@ TEST_F(TestConfiguratorFixture, TestDrop)
     ASSERT_SET_SUCCESS_NEW_KEY(conf.Set(ConfigPair("wireless.cheese", ConfigType<bool>(true)), 0));
     conf.Drop(0);
     conf.Commit(0);
-    ASSERT_FALSE(mStorage.ValueExists("wireless.waffle"));
-    ASSERT_FALSE(mStorage.ValueExists("wireless.cheese"));
+    ASSERT_FALSE(mBackingStore.ValueExists("wireless.waffle"));
+    ASSERT_FALSE(mBackingStore.ValueExists("wireless.cheese"));
 }
 
 TEST_F(TestConfiguratorFixture, TestCommitSignal)
@@ -174,9 +177,9 @@ TEST_F(TestConfiguratorFixture, Erase)
 
     conf.Erase(ConfigPair::Key("wireless.waffle"), 0);
     // Erases have to be committed
-    ASSERT_TRUE(mStorage.ValueExists("wireless.waffle"));
+    ASSERT_TRUE(mBackingStore.ValueExists("wireless.waffle"));
     conf.Commit(0);
-    ASSERT_FALSE(mStorage.ValueExists("wireless.waffle"));
+    ASSERT_FALSE(mBackingStore.ValueExists("wireless.waffle"));
 }
 
 TEST_F(TestConfiguratorFixture, GetAllKeys)
@@ -218,9 +221,9 @@ TEST_F(TestConfiguratorFixture, DifferentIds)
     // Different ID, so the above aren't committed
     conf.Commit(1);
 
-    ASSERT_FALSE(mStorage.ValueExists("wireless.waffle"));
-    ASSERT_FALSE(mStorage.ValueExists("wireless.cheese"));
-    ASSERT_FALSE(mStorage.ValueExists("wireless.dynamite.explode"));
+    ASSERT_FALSE(mBackingStore.ValueExists("wireless.waffle"));
+    ASSERT_FALSE(mBackingStore.ValueExists("wireless.cheese"));
+    ASSERT_FALSE(mBackingStore.ValueExists("wireless.dynamite.explode"));
 
     // Same ID now, so they should be committed
     conf.Commit(0);
@@ -255,9 +258,9 @@ TEST_F(TestConfiguratorFixture, MaxTransactions)
 
     // No affect since the transactions were dropped
     conf.Commit(0);
-    ASSERT_FALSE(mStorage.ValueExists("wireless.waffle"));
-    ASSERT_FALSE(mStorage.ValueExists("wireless.cheese"));
-    ASSERT_FALSE(mStorage.ValueExists("wireless.dynamite.explode"));
+    ASSERT_FALSE(mBackingStore.ValueExists("wireless.waffle"));
+    ASSERT_FALSE(mBackingStore.ValueExists("wireless.cheese"));
+    ASSERT_FALSE(mBackingStore.ValueExists("wireless.dynamite.explode"));
 
     conf.Commit(1);
     ASSERT_EQ(9, UnwrapSinglePair(conf.Get(ConfigPair::Key("stuff"))).get().UnpackValue<int32_t>());
@@ -281,15 +284,15 @@ TEST_F(TestConfiguratorFixture, EraseNamespace)
     conf.Erase(ConfigPair::Key("wireless.*"), 0);
     conf.Commit(0);
 
-    ASSERT_FALSE(mStorage.ValueExists("wireless.waffle"));
-    ASSERT_FALSE(mStorage.ValueExists("wireless.cheese"));
-    ASSERT_FALSE(mStorage.ValueExists("wireless.dynamite.explode"));
+    ASSERT_FALSE(mBackingStore.ValueExists("wireless.waffle"));
+    ASSERT_FALSE(mBackingStore.ValueExists("wireless.cheese"));
+    ASSERT_FALSE(mBackingStore.ValueExists("wireless.dynamite.explode"));
 
     conf.Set(ConfigPair("wireless", ConfigType<std::string>("dumb")), 0);
     conf.Erase(ConfigPair::Key("wireless.*"), 0);
     conf.Commit(0);
 
-    ASSERT_TRUE(mStorage.ValueExists("wireless"));
+    ASSERT_TRUE(mBackingStore.ValueExists("wireless"));
 }
 
 TEST_F(TestConfiguratorFixture, LastItemsNamespace)
@@ -301,7 +304,7 @@ TEST_F(TestConfiguratorFixture, LastItemsNamespace)
     conf.Set(ConfigPair("wireless.dynamite.explode", ConfigType<int32_t>(5)), 0);
 
     conf.Commit(0);
-    ASSERT_FALSE(mStorage.ValueExists("last.wireless.waffle"));
+    ASSERT_FALSE(mBackingStore.ValueExists("last.wireless.waffle"));
 
     conf.Set(ConfigPair("wireless.waffle", ConfigType<std::string>("no more cheese")), 0);
     conf.Commit(0);
@@ -317,7 +320,7 @@ TEST_F(TestConfiguratorFixture, LastItemsNamespace)
 
     conf.Set(ConfigPair("wireless.waffle", ConfigType<std::string>("cheeseisback")), 0);
     conf.Commit(0);
-    ASSERT_FALSE(mStorage.ValueExists("last.wireless.waffle"));
+    ASSERT_FALSE(mBackingStore.ValueExists("last.wireless.waffle"));
 }
 
 TEST_F(TestConfiguratorFixture, EmptyCommits)

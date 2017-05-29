@@ -31,7 +31,7 @@ public: // IConfigurator
 
     virtual void Drop(IConfigurator::ClientId clientId);
 
-    void Erase(const ConfigPair::Key& key, IConfigurator::ClientId clientId);
+    virtual void Erase(const ConfigPair::Key& key, IConfigurator::ClientId clientId);
 
     ConfigPairList InFlightItems(IConfigurator::ClientId clientId);
 

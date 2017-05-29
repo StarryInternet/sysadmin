@@ -27,6 +27,7 @@ set(SYSADMIN_SOURCE_FILES
     sysadmin.cpp
     TemplaterRunner.cpp
     TransactionManager.cpp
+    WildcardConfigurator.cpp
 )
 
 set(LIBS sysadmin-api)

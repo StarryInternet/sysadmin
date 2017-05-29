@@ -131,14 +131,14 @@ YAML::Node UnpackIntoYAML(const ConfigPair& value)
 
 LocalYAMLStorage::LocalYAMLStorage(const std::string& root)
   : mRoot(root)
-  , mInFlightItems(100, this)
+  , mInFlightItems(100)
 {
     bfs::create_directories(mRoot);
 }
 
 LocalYAMLStorage::LocalYAMLStorage(const bfs::path& root)
   : mRoot(root)
-  , mInFlightItems(100, this)
+  , mInFlightItems(100)
 {
     bfs::create_directories(mRoot);
 }

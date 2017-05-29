@@ -14,7 +14,7 @@ Configurator::Configurator(IConfigurator* storage, IHistoryStorage* history,
                            size_t maxTransactions)
   : mSystemStore(storage)
   , mCommitHistory(this, history, 100)
-  , mInFlightItems(maxTransactions, this)
+  , mInFlightItems(maxTransactions)
   , mServiceHooksCallback()
 {
     BOOST_ASSERT(storage);

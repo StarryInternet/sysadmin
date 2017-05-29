@@ -1,9 +1,8 @@
 
 #include "LockedConfigPairMap.h"
 
-LockedConfigPairMap::LockedConfigPairMap(size_t max_size, IConfigurator* pDb)
+LockedConfigPairMap::LockedConfigPairMap(size_t max_size)
   : mStorage(max_size)
-  , mpDb(pDb)
 {
 }
 
@@ -18,24 +17,7 @@ void LockedConfigPairMap::Insert(BucketId bucket, const ConfigPair& newItem)
 
 void LockedConfigPairMap::Erase(BucketId bucket, const ConfigPair::Key& key)
 {
-    if (key.IsWildcard())
-    {
-        auto subkeys = mpDb->GetAllKeys(key);
-        for (const auto& key : subkeys)
-        {
-            // Don't allow wildcard deletion of last.* or default.* keys
-            if (key.SubkeyMatches(ConfigKey("last.*")) ||
-                key.SubkeyMatches(ConfigKey("default.*")))
-            {
-                continue;
-            }
-            Insert(bucket, ConfigPair(key));
-        }
-    }
-    else
-    {
-        Insert(bucket, ConfigPair(key));
-    }
+    Insert(bucket, ConfigPair(key));
 }
 
 void LockedConfigPairMap::Drop(BucketId bucket)

@@ -18,6 +18,7 @@
 #include "MemoryCache.h"
 #include "LocalHistoryStorage.h"
 #include "CommitHistory.h"
+#include "WildcardConfigurator.h"
 
 namespace dm = decibel::messaging;
 using namespace std::placeholders;
@@ -46,7 +47,8 @@ int main(int argc, const char* argv[])
     LocalYAMLStorage storage(config.storagePath);
     MemoryCache cache(&storage);
     LocalHistoryStorage history(config.historyStorage, YAMLSerializer, YAMLDeserializer);
-    Configurator configurator(&cache, &history);
+    WildcardConfigurator wildcarder(&cache);
+    Configurator configurator(&wildcarder, &history);
 
     dm::Reactor reactor;
 

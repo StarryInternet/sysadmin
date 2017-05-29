@@ -27,7 +27,7 @@ public:
     typedef size_t BucketId;
 
 public:
-    LockedConfigPairMap(size_t max_size, IConfigurator* pDb);
+    LockedConfigPairMap(size_t max_size);
 
     void Insert(BucketId bucket, const ConfigPair& newItem);
 
@@ -47,9 +47,4 @@ public:
 
 private:
     SizeAgeBoundMap<BucketId, LockedConfigPairList> mStorage;
-    // I _think_, once there are only IConfigurators, I will create a simpler
-    // abstract pass through Configurator pipeline unit that will handle
-    // wildcards, which will then make this pointer unnecessary. For now,
-    // the goal is to have every step of this change actually function
-    IConfigurator* mpDb;
 };
