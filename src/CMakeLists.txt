@@ -57,6 +57,9 @@ find_package(Folly REQUIRED)
 include_directories(${FOLLY_INCLUDE_DIR})
 set(LIBS ${LIBS} ${FOLLY_LIBRARY})
 
+find_package(DoubleConversion REQUIRED)
+set(LIBS ${LIBS} ${DOUBLE_CONVERSION_LIBRARY})
+
 find_package(YamlCpp 0.5.1 REQUIRED)
 include_directories(${YAMLCPP_INCLUDE_DIR})
 set(LIBS ${LIBS} ${YAMLCPP_LIBRARIES})
