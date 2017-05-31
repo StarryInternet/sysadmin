@@ -3,11 +3,23 @@
 set -e
 set -x
 
-CPU_COUNT=$(lscpu -p | sed '/^#/ d' | wc -l)
+if [[ $(which lscpu) ]]; then
+    CPU_COUNT=$(lscpu -p | sed '/^#/ d' | wc -l)
+else
+    CPU_COUNT=4
+fi
 MAKE="make -j${CPU_COUNT}"
 
-WORKDIR=${1-/home/vagrant/tmp/bin}
-INSTALL_PREFIX=${2-/usr}
+PLATFORM=$(uname)
+
+if [[ ${PLATFORM} == "Darwin" ]]; then
+    SO_EXT="dylib"
+elif [[ ${PLATFORM} == "Linux" ]]; then
+    SO_EXT="dylib"
+fi
+
+WORKDIR=${1-./tmp/}
+INSTALL_PREFIX=${2-/usr/local}
 PATCHESDIR=${3-/vagrant}
 
 BOOST_MAJOR="1"
@@ -18,7 +30,7 @@ BOOST_VERSION_DOTTED="${BOOST_MAJOR}.${BOOST_MINOR}.${BOOST_PATCH}"
 BOOST_DIR_NAME="boost_${BOOST_VERSION}"
 BOOST_ARCHIVE_NAME="boost_${BOOST_VERSION}.tar.gz"
 BOOST_URL="http://sourceforge.net/projects/boost/files/boost/${BOOST_VERSION_DOTTED}/${BOOST_ARCHIVE_NAME}"
-if [ ! -e "${INSTALL_PREFIX}/lib/libboost_system.so" ]; then
+if [ ! -e "${INSTALL_PREFIX}/lib/libboost_system.${SO_EXT}" ]; then
     if [ ! -e "${WORKDIR}/${BOOST_ARCHIVE_NAME}" ]; then
         mkdir -p "${WORKDIR}/download"
         wget -q -P "${WORKDIR}/download" "${BOOST_URL}"
@@ -37,7 +49,7 @@ LIBUV_VERSION="1.6.1"
 LIBUV_DIR_NAME="libuv-v${LIBUV_VERSION}"
 LIBUV_ARCHIVE_NAME="libuv-v${LIBUV_VERSION}.tar.gz"
 LIBUV_URL="http://dist.libuv.org/dist/v${LIBUV_VERSION}/${LIBUV_ARCHIVE_NAME}"
-if [ ! -e "${INSTALL_PREFIX}/lib64/libuv.so" ] && [ ! -e "${INSTALL_PREFIX}/lib/libuv.so" ]; then
+if [ ! -e "${INSTALL_PREFIX}/lib64/libuv.${SO_EXT}" ] && [ ! -e "${INSTALL_PREFIX}/lib/libuv.${SO_EXT}" ]; then
     if [ ! -e "${WORKDIR}/${LIBUV_ARCHIVE_NAME}" ]; then
         mkdir -p "${WORKDIR}/download"
         wget -q -P "${WORKDIR}/download" "${LIBUV_URL}"
@@ -59,7 +71,8 @@ AMQP_CPP_DIR_NAME="AMQP-CPP-${AMQP_CPP_VERSION}"
 AMQP_CPP_ARCHIVE_NAME="v${AMQP_CPP_VERSION}.tar.gz"
 AMQP_CPP_URL="https://github.com/CopernicaMarketingSoftware/AMQP-CPP/archive/v${AMQP_CPP_VERSION}.tar.gz"
 
-if [ ! -e "${INSTALL_PREFIX}/lib/libamqpcpp.so" ]; then
+# amqp-cpp installs a .so, not a .dylib, even on osx
+if [ ! -e "${INSTALL_PREFIX}/lib/libamqpcpp.so.${AMQP_CPP_VERSION}" ]; then
     if [ ! -e "${WORKDIR}/${AMQP_CPP_ARCHIVE_NAME}" ]; then
         mkdir -p "${WORKDIR}/download"
         wget -q -P "${WORKDIR}/download" "${AMQP_CPP_URL}"
@@ -67,9 +80,11 @@ if [ ! -e "${INSTALL_PREFIX}/lib/libamqpcpp.so" ]; then
     fi
     tar -C "${WORKDIR}" -zxvf "${WORKDIR}/${AMQP_CPP_ARCHIVE_NAME}"
     pushd "${WORKDIR}/${AMQP_CPP_DIR_NAME}"
-    ${MAKE}
-    ${MAKE} install PREFIX="${INSTALL_PREFIX}"
-    ldconfig
+    mkdir -p build
+    pushd build
+    cmake ..
+    make
+    make install
     popd
 fi
 
@@ -80,16 +95,16 @@ FOLLY_DIR_NAME="folly-${FOLLY_VERSION}"
 FOLLY_ARCHIVE_NAME="v${FOLLY_VERSION}.tar.gz"
 FOLLY_URL="https://github.com/facebook/folly/archive/v${FOLLY_VERSION}.tar.gz"
 
-if [ ! -e "${INSTALL_PREFIX}/lib64/libfolly.so" ] && [ ! -e "${INSTALL_PREFIX}/lib/libfolly.so" ]; then
+if [ ! -e "${INSTALL_PREFIX}/lib64/libfolly.${SO_EXT}" ] && [ ! -e "${INSTALL_PREFIX}/lib/libfolly.${SO_EXT}" ]; then
     if [ ! -e "${WORKDIR}/folly" ]; then
         mkdir -p "${WORKDIR}/folly"
         git clone https://github.com/facebook/folly.git "${WORKDIR}/folly"
     fi
     pushd "${WORKDIR}/folly"
     git checkout "${FOLLY_VERSION}"
-    mkdir -p patches
-    cp ${PATCHESDIR}/patches/folly/* patches/
-    git apply patches/*
+    #mkdir -p patches
+    #cp ${PATCHESDIR}/patches/folly/* patches/
+    #git apply patches/*
     pushd folly
     autoreconf -ivf
     ./configure --prefix="${INSTALL_PREFIX}"
@@ -120,7 +135,7 @@ if [ ! -e "${INSTALL_PREFIX}/bin/protoc" ]; then
 fi
 
 # yaml-cpp
-YAML_CPP_VERSION="0.5.2"
+YAML_CPP_VERSION="0.5.3"
 YAML_CPP_DIR_NAME="yaml-cpp-release-${YAML_CPP_VERSION}"
 YAML_CPP_ARCHIVE_NAME="release-${YAML_CPP_VERSION}.tar.gz"
 YAML_CPP_URL="https://github.com/jbeder/yaml-cpp/archive/${YAML_CPP_ARCHIVE_NAME}"
@@ -133,9 +148,9 @@ if [ ! -e "${INSTALL_PREFIX}/lib/libyaml-cpp.a" ]; then
     fi
     tar -C "${WORKDIR}" -zxvf "${WORKDIR}/${YAML_CPP_ARCHIVE_NAME}"
     pushd "${WORKDIR}/${YAML_CPP_DIR_NAME}"
-    mkdir -p patches
-    cp ${PATCHESDIR}/patches/yaml-cpp/* patches/
-    git apply patches/*
+    #mkdir -p patches
+    #cp ${PATCHESDIR}/patches/yaml-cpp/* patches/
+    #git apply patches/*
     cmake -DCMAKE_INSTALL_PREFIX="${INSTALL_PREFIX}" .
     ${MAKE}
     ${MAKE} install
