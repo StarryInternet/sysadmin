@@ -1,0 +1,29 @@
+From 830731746d8e222990ecb2b8bc248d1bf6ece37e Mon Sep 17 00:00:00 2001
+From: Matt Pelland <mpelland@starry.com>
+Date: Thu, 21 Jul 2016 20:47:17 -0400
+Subject: [PATCH 1/6] never use fibers
+
+---
+ folly/futures/Future-inl.h | 5 -----
+ 1 file changed, 5 deletions(-)
+
+diff --git a/folly/futures/Future-inl.h b/folly/futures/Future-inl.h
+index c068df0..8ea10ee 100644
+--- a/folly/futures/Future-inl.h
++++ b/folly/futures/Future-inl.h
+@@ -28,12 +28,7 @@
+ #include <folly/futures/detail/Core.h>
+ #include <folly/futures/Timekeeper.h>
+ 
+-#if FOLLY_MOBILE || defined(__APPLE__)
+ #define FOLLY_FUTURE_USING_FIBER 0
+-#else
+-#define FOLLY_FUTURE_USING_FIBER 1
+-#include <folly/fibers/Baton.h>
+-#endif
+ 
+ namespace folly {
+ 
+-- 
+2.7.4
+

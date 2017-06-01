@@ -1,0 +1,23 @@
+diff --git a/folly/Conv.h b/folly/Conv.h
+index df34f2f..56a123a 100644
+--- a/folly/Conv.h
++++ b/folly/Conv.h
+@@ -670,7 +670,7 @@ estimateSpaceNeeded(Src value) {
+     double_conversion::DoubleToStringConverter::kBase10MaximalLength + 1;
+   // strlen("E-") + digits10(numeric_limits<double>::max_exponent10)
+   constexpr int kMaxExponentSpace = 2 + 3;
+-  static const int kMaxPositiveSpace = std::max({
++  std::initializer_list<int> initList = {
+       // E.g. 1.1111111111111111E-100.
+       kMaxMantissaSpace + kMaxExponentSpace,
+       // E.g. 0.000001.1111111111111111, if kConvMaxDecimalInShortestLow is -6.
+@@ -679,7 +679,8 @@ estimateSpaceNeeded(Src value) {
+       // number > 1 which ToShortest outputs in exponential notation,
+       // so 21 is the longest non-exponential number > 1.
+       detail::kConvMaxDecimalInShortestHigh
+-    });
++  };
++  static const int kMaxPositiveSpace = std::max(initList);
+   return kMaxPositiveSpace + (value < 0);  // +1 for minus sign, if negative
+ }
+ 
