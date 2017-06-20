@@ -22,7 +22,7 @@ namespace messaging
 class Protocol;
 class IProtocolFactory;
 
-class Reactor : public folly::Executor, public folly::Timekeeper
+class Reactor : public folly::Timekeeper
 {
 public:
     Reactor();
@@ -71,7 +71,7 @@ public:
     }
 
     // folly::Executor
-    virtual void add(folly::Func fn);
+    // virtual void add(folly::Func fn);
 
     // folly::TimeKeeper
     virtual folly::Future<folly::Unit> after(folly::Duration duration);

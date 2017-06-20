@@ -2,7 +2,7 @@
 
 #include <memory>
 
-#ifndef __cpp_lib_make_unique
+#if !defined __cpp_lib_make_unique && !defined __APPLE__
 
 namespace std
 {

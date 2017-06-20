@@ -25,6 +25,21 @@ namespace
 namespace dm = decibel::messaging;
 namespace bfs = boost::filesystem;
 
+namespace YAML
+{
+
+Node convert<ConfigType<std::vector<bool>>>::encode(const ConfigType<std::vector<bool>>& val)
+{
+    Node output;
+    for (const auto& iter : val.mValue)
+    {
+        output.push_back(bool(iter));
+    }
+    return output;
+}
+
+}
+
 YAML::Node LoadOrCreate(boost::filesystem::path path)
 {
     YAML::Node config;

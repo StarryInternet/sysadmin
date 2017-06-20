@@ -12,6 +12,22 @@
 
 #include <yaml-cpp/yaml.h>
 
+// Strictly speaking, this specialization is only necessary on macOS. The C++ headers included
+// in osx are opinionated enough about the bool vector specialization that they don't use
+// the same proxy reference methodology the gnu stdlib uses, or something like that.
+// Subsequently, we need to do this bool casting badness to get yaml-cpp's assignment to work
+// Chere here for more details: https://stackoverflow.com/questions/31974237/why-is-libcs-vectorboolconst-reference-not-bool
+namespace YAML
+{
+
+template<>
+struct convert<ConfigType<std::vector<bool>>>
+{
+    static Node encode(const ConfigType<std::vector<bool>>& val);
+};
+
+}
+
 #define DYNAMIC_UNPACK(value, storage)                      \
     if (value.Is<int32_t>())                                \
     {                                                       \
@@ -35,7 +51,7 @@
     }                                                       \
     else if (value.Is<std::vector<bool>>())                 \
     {                                                       \
-        storage = value.Unpack<std::vector<bool>>();        \
+        storage = value.ToConfigType<std::vector<bool>>();  \
     }
 
 std::pair<boost::filesystem::path, std::string> TranslateKeyToPathPair(const ConfigPair::Key& key);

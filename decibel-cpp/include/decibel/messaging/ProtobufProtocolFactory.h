@@ -51,7 +51,7 @@ public:
         {
             auto protocol = std::make_unique<ProtocolT>(mDispatcher);
             protocol->RegisterSendErrorCallback(*mSendErrorCallback);
-            return protocol;
+            return std::move(protocol);
         }
         else
         {
