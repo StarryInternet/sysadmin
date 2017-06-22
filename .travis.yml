@@ -1,0 +1,23 @@
+language: cpp
+# Handle git submodules yourself
+git:
+    submodules: false
+# Use sed to replace the SSH URL with the public URL, then initialize submodules
+before_install:
+    - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
+    - git submodule update --init --recursive
+install: ./third-party-build.sh
+# cmake doesn't obey CC and CXX, so we have to force the compiler here
+script: mkdir build && cd build && cmake -DCMAKE_C_COMPILER=gcc-6 -DCMAKE_CXX_COMPILER=g++-6 . && make && make check
+compiler: gcc
+addons:
+  apt:
+    sources:
+      - george-edison55-precise-backports
+      - ubuntu-toolchain-r-test
+    packages:
+      - cmake-data
+      - cmake
+      - g++-6
+    env:
+      - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
