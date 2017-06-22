@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 
 set -e
-set -x
 
 CPU_COUNT=$(lscpu -p | sed '/^#/ d' | wc -l)
 MAKE="make -j${CPU_COUNT}"
@@ -24,13 +23,16 @@ if [ ! -e "${INSTALL_PREFIX}/lib/libboost_system.so" ]; then
         wget -q -P "${WORKDIR}/download" "${BOOST_URL}"
         mv "${WORKDIR}/download/${BOOST_ARCHIVE_NAME}" "${WORKDIR}"
     fi
-    tar -C "${WORKDIR}" -zxvf "${WORKDIR}/${BOOST_ARCHIVE_NAME}"
+    # tar is also loud
+    tar -C "${WORKDIR}" -zxf "${WORKDIR}/${BOOST_ARCHIVE_NAME}"
     pushd "${WORKDIR}/${BOOST_DIR_NAME}"
+    # boost build scripts are really loud
     ./bootstrap.sh --prefix="${INSTALL_PREFIX}"
     ./b2 "-j${CPU_COUNT}" install
     popd
 fi
 
+echo "Finished boost"
 
 # libuv
 LIBUV_VERSION="1.6.1"
@@ -43,7 +45,7 @@ if [ ! -e "${INSTALL_PREFIX}/lib64/libuv.so" ] && [ ! -e "${INSTALL_PREFIX}/lib/
         wget -q -P "${WORKDIR}/download" "${LIBUV_URL}"
         mv "${WORKDIR}/download/${LIBUV_ARCHIVE_NAME}" "${WORKDIR}"
     fi
-    tar -C "${WORKDIR}" -zxvf "${WORKDIR}/${LIBUV_ARCHIVE_NAME}"
+    tar -C "${WORKDIR}" -zxf "${WORKDIR}/${LIBUV_ARCHIVE_NAME}"
     pushd "${WORKDIR}/${LIBUV_DIR_NAME}"
     sh autogen.sh
     ./configure --prefix="${INSTALL_PREFIX}"
@@ -52,6 +54,7 @@ if [ ! -e "${INSTALL_PREFIX}/lib64/libuv.so" ] && [ ! -e "${INSTALL_PREFIX}/lib/
     popd
 fi
 
+echo "Finished libuv"
 
 # AMQP-CPP
 AMQP_CPP_VERSION="2.6.2"
@@ -65,7 +68,7 @@ if [ ! -e "${INSTALL_PREFIX}/lib/libamqpcpp.so" ]; then
         wget -q -P "${WORKDIR}/download" "${AMQP_CPP_URL}"
         mv "${WORKDIR}/download/${AMQP_CPP_ARCHIVE_NAME}" "${WORKDIR}"
     fi
-    tar -C "${WORKDIR}" -zxvf "${WORKDIR}/${AMQP_CPP_ARCHIVE_NAME}"
+    tar -C "${WORKDIR}" -zxf "${WORKDIR}/${AMQP_CPP_ARCHIVE_NAME}"
     pushd "${WORKDIR}/${AMQP_CPP_DIR_NAME}"
     ${MAKE}
     ${MAKE} install PREFIX="${INSTALL_PREFIX}"
@@ -73,6 +76,7 @@ if [ ! -e "${INSTALL_PREFIX}/lib/libamqpcpp.so" ]; then
     popd
 fi
 
+echo "Finished amqp-cpp"
 
 # folly
 FOLLY_VERSION="e28213bf2c5aa1c400cfd2ab363abfeadee81fa2"
@@ -99,6 +103,8 @@ if [ ! -e "${INSTALL_PREFIX}/lib64/libfolly.so" ] && [ ! -e "${INSTALL_PREFIX}/l
     popd
 fi
 
+echo "Finished Folly"
+
 # protobuf
 
 PROTOBUF_VERSION="2.6.1"
@@ -111,13 +117,15 @@ if [ ! -e "${INSTALL_PREFIX}/bin/protoc" ]; then
         wget -q -P "${WORKDIR}/download" "${PROTOBUF_URL}"
         mv "${WORKDIR}/download/${PROTOBUF_ARCHIVE_NAME}" "${WORKDIR}"
     fi
-    tar -C "${WORKDIR}" -zxvf "${WORKDIR}/${PROTOBUF_ARCHIVE_NAME}"
+    tar -C "${WORKDIR}" -zxf "${WORKDIR}/${PROTOBUF_ARCHIVE_NAME}"
     pushd "${WORKDIR}/${PROTOBUF_DIR_NAME}"
     ./configure --prefix="${INSTALL_PREFIX}"
     ${MAKE}
     ${MAKE} install
     popd
 fi
+
+echo "Finished yaml-cpp"
 
 # yaml-cpp
 YAML_CPP_VERSION="0.5.2"
@@ -131,7 +139,7 @@ if [ ! -e "${INSTALL_PREFIX}/lib/libyaml-cpp.a" ]; then
         wget -q -P "${WORKDIR}/download" "${YAML_CPP_URL}"
         mv "${WORKDIR}/download/${YAML_CPP_ARCHIVE_NAME}" "${WORKDIR}"
     fi
-    tar -C "${WORKDIR}" -zxvf "${WORKDIR}/${YAML_CPP_ARCHIVE_NAME}"
+    tar -C "${WORKDIR}" -zxf "${WORKDIR}/${YAML_CPP_ARCHIVE_NAME}"
     pushd "${WORKDIR}/${YAML_CPP_DIR_NAME}"
     mkdir -p patches
     cp ${PATCHESDIR}/patches/yaml-cpp/* patches/
@@ -141,3 +149,5 @@ if [ ! -e "${INSTALL_PREFIX}/lib/libyaml-cpp.a" ]; then
     ${MAKE} install
     popd
 fi
+
+echo "Finished dependencies"

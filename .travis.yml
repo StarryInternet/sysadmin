@@ -6,7 +6,7 @@ git:
 before_install:
     - sed -i 's/git@github.com:/https:\/\/github.com\//' .gitmodules
     - git submodule update --init --recursive
-install: ./third-party-build.sh
+install: mkdir work_dir && mkdir install_dir && mkdir patches_dir && sudo ./third-party-build.sh work_dir install_dir patches_dir
 # cmake doesn't obey CC and CXX, so we have to force the compiler here
 script: mkdir build && cd build && cmake -DCMAKE_C_COMPILER=gcc-6 -DCMAKE_CXX_COMPILER=g++-6 . && make && make check
 compiler: gcc
