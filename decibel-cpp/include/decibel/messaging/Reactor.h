@@ -22,7 +22,7 @@ namespace messaging
 class Protocol;
 class IProtocolFactory;
 
-class Reactor : public folly::Executor, public folly::Timekeeper
+class Reactor : public folly::Timekeeper
 {
 public:
     Reactor();
@@ -70,8 +70,9 @@ public:
         return pPromise->getFuture();
     }
 
-    // folly::Executor
-    virtual void add(folly::Func fn);
+    // This is kept around for posterity should anyone want to add back
+    // folly::Executor functionality
+    // virtual void add(folly::Func fn);
 
     // folly::TimeKeeper
     virtual folly::Future<folly::Unit> after(folly::Duration duration);

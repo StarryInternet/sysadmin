@@ -28,8 +28,7 @@ namespace decibel
 namespace messaging
 {
 Reactor::Reactor()
-    : folly::Executor()
-    , folly::Timekeeper()
+    : folly::Timekeeper()
     , mEventLoop()
     , mpTimer(
           std::make_unique<EventLoopTimer>(niceuv::EventLoopTimer(&mEventLoop)))
@@ -153,10 +152,12 @@ void Reactor::CancelCall(std::shared_ptr<OneShotTimerEvent> pTimer)
     pTimer->Stop();
 }
 
-void Reactor::add(folly::Func fn)
-{
-    CallSoon(fn);
-}
+// This is kept around for posterity should anyone want to add back
+// folly::Executor functionality
+// void Reactor::add(folly::Func fn)
+// {
+//     CallSoon(fn);
+// }
 
 folly::Future<folly::Unit> Reactor::after(folly::Duration duration)
 {

@@ -18,7 +18,7 @@ public:
     virtual void HandleData(AMQP::Message&& message, uint64_t, bool)
     {
         MessageType protobufMessage;
-        protobufMessage.ParseFromString(message.message());
+        protobufMessage.ParseFromString(std::string(message.body()));
         HandleMessage(std::move(protobufMessage));
     }
 

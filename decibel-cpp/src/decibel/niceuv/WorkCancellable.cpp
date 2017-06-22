@@ -1,5 +1,8 @@
 #include "decibel/niceuv/WorkCancellable.h"
 
+#include <exception>
+#include <stdexcept>
+
 namespace decibel
 {
 namespace niceuv

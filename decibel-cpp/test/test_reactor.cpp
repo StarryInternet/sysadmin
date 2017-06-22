@@ -153,12 +153,14 @@ TEST(TestSelfConnectMultiClients, ConnectTcp)
     ASSERT_EQ(1, rawpProto2->mConnectionLostCalls);
 }
 
-TEST(TestReactor, FollyExecutorAdd)
-{
-    dm::Reactor r;
-    bool then_called = false;
-    auto fut = folly::makeFuture().via(&r).then([&]() { then_called = true; });
-    ASSERT_FALSE(then_called);
-    r.Start();
-    ASSERT_TRUE(then_called);
-}
+// This is kept around for posterity should anyone want to add back
+// folly::Executor functionality
+// TEST(TestReactor, FollyExecutorAdd)
+// {
+//     dm::Reactor r;
+//     bool then_called = false;
+//     auto fut = folly::makeFuture().via(&r).then([&]() { then_called = true; });
+//     ASSERT_FALSE(then_called);
+//     r.Start();
+//     ASSERT_TRUE(then_called);
+// }

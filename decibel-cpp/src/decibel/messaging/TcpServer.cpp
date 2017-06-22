@@ -23,7 +23,7 @@ TcpServer::TcpServer(niceuv::EventLoop* loop,
     : mServer(new niceuv::TcpServer(loop)), mProtocols()
 {
     auto connectCb = [factory, this, host, port](niceuv::TcpConnPtr conn) {
-        auto pProtocol = std::move(factory->Construct());
+        auto pProtocol = factory->Construct();
         auto rawpConn = conn.get();
         auto pTransport =
             std::make_unique<TcpTransport>(std::move(conn), host, port);

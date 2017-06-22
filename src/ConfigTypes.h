@@ -74,6 +74,21 @@ public:
     }
 
     template <typename T>
+    ConfigType<T> ToConfigType() const
+    {
+        BOOST_ASSERT_MSG(!mEmpty, "Can't dereference Empty Value");
+        try
+        {
+            return boost::get<ConfigType<T>>(mValue);
+        }
+        catch (const boost::bad_get& ex)
+        {
+            BOOST_ASSERT_MSG(false, "Requested incorrect type from variant");
+            return ConfigType<T>({});
+        }
+    }
+
+    template <typename T>
     bool Is() const
     {
         if (mEmpty)
