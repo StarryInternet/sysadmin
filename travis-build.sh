@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -e
+
 FOLLY_VERSION="v2017.06.12.00"
 
 git clone https://github.com/facebook/folly.git
@@ -8,7 +10,7 @@ pushd folly
 git checkout $FOLLY_VERSION
 
 # sed the script to pull glog from the right place
-./folly/build/deps_ubuntu_12.04.sh
+./folly/build/build_debs_ubuntu_14.04.sh
 popd
 
 echo "Done installing folly and its deps"
