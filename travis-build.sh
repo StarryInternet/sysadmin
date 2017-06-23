@@ -15,9 +15,9 @@ echo "Done installing folly and its deps"
 
 apt-get install liblog4cxx10-dev libprotobuf-dev
 
-WORKDIR=${~/}
-INSTALL_PREFIX=${2-/usr/local}
-PATCHESDIR=${3~/}
+WORKDIR=~/deps
+INSTALL_PREFIX=/usr/local
+PATCHESDIR=~/deps/patches
 
 # AMQP-CPP
 AMQP_CPP_VERSION="2.6.2"
