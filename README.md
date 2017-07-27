@@ -50,18 +50,28 @@ as follows:
       provides the API to sysadmin
     - [yaml-cpp](https://github.com/jbeder/yaml-cpp) provides YAML config file support
 
+Systemd Integration
+===================
+
+sysadmin can integrate with systemd as a `notify` type service which can
+prevent races between other services that rely on sysadmin for configuration.
+In order to build sysadmin with systemd notify support you need to pass
+`-DSYSADMIN_USE_SD_NOTIFY` during step 3 outlined below. When building sysadmin
+in this configuration `libsystemd` becomes a required dependency.
+
+There is an a systemd service definition which incorporates this functionality
+located [here](configs/prod/systemd-notify.service).
+
 Development
 ===========
 
 Generally speaking, build as follows:
 
-```
-mkdir build
-cd build
-cmake ..
-make check
-make
-```
+1. mkdir build
+2. cd build
+3. cmake ..
+4. make check
+5. make
 
 `make check` runs only sysadmin's tests. If you wish to run the decibel-cpp tests, run
 `make decibel-check`.

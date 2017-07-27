@@ -72,5 +72,15 @@ target_link_libraries(libsysadmin INTERFACE ${LIBS} decibel)
 target_include_directories(libsysadmin PUBLIC ${CMAKE_BINARY_DIR} ${PROJECT_SOURCE_DIR})
 target_link_libraries(sysadmin libsysadmin)
 
+if(SYSADMIN_USE_SD_NOTIFY)
+    include(FindSystemd)
+    find_package(Systemd REQUIRED)
+
+    target_link_libraries(sysadmin ${SYSTEMD_LIBRARIES})
+    target_include_directories(sysadmin PRIVATE ${SYSTEMD_INCLUDE_DIRS})
+
+    target_compile_definitions(sysadmin PRIVATE _SYSADMIN_USE_SD_NOTIFY)
+endif()
+
 install(TARGETS sysadmin
         RUNTIME DESTINATION bin)

@@ -152,12 +152,10 @@ void Reactor::CancelCall(std::shared_ptr<OneShotTimerEvent> pTimer)
     pTimer->Stop();
 }
 
-// This is kept around for posterity should anyone want to add back
-// folly::Executor functionality
-// void Reactor::add(folly::Func fn)
-// {
-//     CallSoon(fn);
-// }
+void Reactor::add(folly::Func fn)
+{
+    CallSoon(fn);
+}
 
 folly::Future<folly::Unit> Reactor::after(folly::Duration duration)
 {

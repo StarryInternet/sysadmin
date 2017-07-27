@@ -1,4 +1,9 @@
 #include <iostream>
+
+#ifdef _SYSADMIN_USE_SD_NOTIFY
+#include <systemd/sd-daemon.h>
+#endif
+
 #include <boost/filesystem.hpp>
 #include <log4cxx/logger.h>
 #include <log4cxx/propertyconfigurator.h>
@@ -102,6 +107,16 @@ int main(int argc, const char* argv[])
             errResponse.set_status(sysadminctl::StatusCode::MESSAGE_SIZE_ERROR);
             protocol->Send(errResponse);
         });
+
+#ifdef _SYSADMIN_USE_SD_NOTIFY
+    reactor.add([]() {
+        auto rc = sd_notify(1, "READY=1");
+
+        if (rc < 0) {
+            LOG4CXX_WARN(spLogger, "Failed to notify systemd, error: " << rc);
+        }
+    });
+#endif
 
     LOG4CXX_INFO(spLogger, "Starting sysadmin on port " << config.port);
     reactor.ServeTcp(config.host, config.port, &factory);

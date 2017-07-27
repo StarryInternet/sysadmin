@@ -70,9 +70,7 @@ public:
         return pPromise->getFuture();
     }
 
-    // This is kept around for posterity should anyone want to add back
-    // folly::Executor functionality
-    // virtual void add(folly::Func fn);
+    virtual void add(folly::Func fn);
 
     // folly::TimeKeeper
     virtual folly::Future<folly::Unit> after(folly::Duration duration);
