@@ -1,0 +1,12 @@
+[Unit]
+Description=Sysadmin
+After=network.target syslog.target
+
+[Service]
+Type=notify
+ExecStart=/bin/sysadmin /etc/sysadmin/config.yaml
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target

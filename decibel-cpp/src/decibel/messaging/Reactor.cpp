@@ -152,8 +152,8 @@ void Reactor::CancelCall(std::shared_ptr<OneShotTimerEvent> pTimer)
     pTimer->Stop();
 }
 
-// This is kept around for posterity should anyone want to add back
-// folly::Executor functionality
+// see include/decibel/messaging/Reactor.h for the reason behind this being
+// commented out.
 // void Reactor::add(folly::Func fn)
 // {
 //     CallSoon(fn);

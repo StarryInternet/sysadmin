@@ -70,8 +70,8 @@ public:
         return pPromise->getFuture();
     }
 
-    // This is kept around for posterity should anyone want to add back
-    // folly::Executor functionality
+    // This doesn't compile on OS X, but, leave it here for posterity's sake.
+    // You can uncomment this to turn this class into a folly::Executor.
     // virtual void add(folly::Func fn);
 
     // folly::TimeKeeper
