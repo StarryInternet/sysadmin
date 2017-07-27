@@ -60,7 +60,7 @@ In order to build sysadmin with systemd notify support you need to pass
 in this configuration `libsystemd` becomes a required dependency.
 
 There is an a systemd service definition which incorporates this functionality
-located [here](configs/prod/systemd-notify.service).
+located [here](configs/prod/sysadmin-notify.service).
 
 Development
 ===========
