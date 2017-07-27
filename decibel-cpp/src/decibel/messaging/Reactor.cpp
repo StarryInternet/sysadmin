@@ -152,10 +152,12 @@ void Reactor::CancelCall(std::shared_ptr<OneShotTimerEvent> pTimer)
     pTimer->Stop();
 }
 
-void Reactor::add(folly::Func fn)
-{
-    CallSoon(fn);
-}
+// see include/decibel/messaging/Reactor.h for the reason behind this being
+// commented out.
+// void Reactor::add(folly::Func fn)
+// {
+//     CallSoon(fn);
+// }
 
 folly::Future<folly::Unit> Reactor::after(folly::Duration duration)
 {

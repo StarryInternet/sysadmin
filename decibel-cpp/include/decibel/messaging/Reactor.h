@@ -70,7 +70,9 @@ public:
         return pPromise->getFuture();
     }
 
-    virtual void add(folly::Func fn);
+    // This doesn't compile on OS X, but, leave it here for posterity's sake.
+    // You can uncomment this to turn this class into a folly::Executor.
+    // virtual void add(folly::Func fn);
 
     // folly::TimeKeeper
     virtual folly::Future<folly::Unit> after(folly::Duration duration);

@@ -109,7 +109,7 @@ int main(int argc, const char* argv[])
         });
 
 #ifdef _SYSADMIN_USE_SD_NOTIFY
-    reactor.add([]() {
+    reactor.CallSoon([]() {
         auto rc = sd_notify(1, "READY=1");
 
         if (rc < 0) {
