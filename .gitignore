@@ -44,3 +44,4 @@ scripts/venv
 
 build/
 scripts/build/
+sysadmin-rs/target

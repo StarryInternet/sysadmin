@@ -65,19 +65,50 @@ located [here](configs/prod/sysadmin-notify.service).
 Development
 ===========
 
+If this is your first time, you might have some dependencies which need to be installed
+first. You can do this in a docker image (recommended) or on your own system.
+
 Generally speaking, build as follows:
 
-1. mkdir build
-2. cd build
-3. cmake ..
-4. make check
-5. make
+1. git submodule update --init --recursive #  make sure you have submodules
+2. mkdir build
+3. cd build
+4. cmake ..
+5. make check
+6. make
 
 `make check` runs only sysadmin's tests. If you wish to run the decibel-cpp tests, run
 `make decibel-check`.
 
-If this is your first time, you might have some dependencies which need to be installed
-first.
+
+Dockerized Development
+======================
+
+For consistancy it's recommended to build and test in Docker. Building the images takes
+some time, but you only need to do it once. Build with:
+
+```bash
+git submodule update --init --recursive #  make sure you have submodules
+docker build -t sysadmin .
+```
+
+This make an image that includes all the 3rd party dependencies. To build Sysadmin
+inside the container you will start a container with the code mounted in.
+Note that you run as a non-root user inside the container so you shouldn't
+have to worry about permissions on files you create.
+
+```bash
+docker run -v ${PWD}:/home/user/sysadmin -it --rm sysadmin
+cd sysadmin
+mkdir build
+cd build
+cmake ..
+make check
+make
+```
+
+Non-Dockerized Development
+==========================
 
 If you're on linux, the included `third-party-build.sh` will pull and install all
 the necessary dependencies.
