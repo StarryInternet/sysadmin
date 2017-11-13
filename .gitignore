@@ -37,10 +37,5 @@ gtest-*.zip
 gmock-*.zip
 coverage/
 lcov-report.info
-generated/
-scripts/venv
-*.pyc
-*.egg-info
 
 build/
-scripts/build/

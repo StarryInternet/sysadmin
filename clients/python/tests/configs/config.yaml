@@ -1,0 +1,5 @@
+---
+log4cxx-config: ./tests/configs/log4cxx.config
+port: 4000
+storage-path: ./tests/tmp
+history-storage: ./tests/historyTmp

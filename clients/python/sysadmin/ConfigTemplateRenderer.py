@@ -1,21 +1,14 @@
 import json
 import os
-import pkgutil
 
 from jinja2 import Environment
 from jinja2 import FileSystemBytecodeCache
 from jinja2 import FileSystemLoader
 
-
-class ThunkHelpers(object):
-    pass
-
-
-if len(filter(lambda info: info[1] == 'sysadmin_helpers', pkgutil.iter_modules())):
+try:
     from sysadmin_helpers import helpers
-else:
-    print "Could not find sysadmin helpers, thunking..."
-    helpers = ThunkHelpers
+except ImportError:
+    helpers = None
 
 
 CACHE_DIR = "/tmp/sysadmin_jinja_cache"
@@ -38,10 +31,13 @@ class ConfigTemplateRenderer:
         self.template = self.env.get_template(templateName)
 
     def renderTemplate(self, args):
-        rendered = self.template.render(__helpers=helpers,
-                                        json=json,
-                                        map=map,
-                                        **args)
+        if helpers is None:
+            rendered = self.template.render(json=json, map=map, **args)
+        else:
+            rendered = self.template.render(__helpers=helpers,
+                                            json=json,
+                                            map=map,
+                                            **args)
         if self._has_newline:
             rendered += '\n'
         return rendered

@@ -1,3 +1,5 @@
+from __future__ import print_function
+
 import glob
 import hashlib
 import os
@@ -51,14 +53,14 @@ class MigrationLog(object):
 
 
 def nested_setter(sysadmin, config, op):
-        def inner_set_configs(current, key_prefix):
-            for k, v in current.iteritems():
-                key = k if key_prefix == '' else '.'.join([key_prefix, k])
-                if isinstance(v, dict):
-                    inner_set_configs(v, key)
-                else:
-                    op(sysadmin, key, v)
-        inner_set_configs(config, '')
+    def inner_set_configs(current, key_prefix):
+        for k, v in current.iteritems():
+            key = k if key_prefix == '' else '.'.join([key_prefix, k])
+            if isinstance(v, dict):
+                inner_set_configs(v, key)
+            else:
+                op(sysadmin, key, v)
+    inner_set_configs(config, '')
 
 
 class SysAdminMigrator(object):
@@ -110,7 +112,7 @@ def default_add_key(sysadmin, key, value):
 def maybe_add_key(sysadmin, key, value):
     existing = sysadmin.get(key)
     if existing.status == sysadminctl_pb2.SUCCESS:
-        print "Key %s already exists, not changing value" % key
+        print("Key {} already exists, not changing value".format(key))
         return
     if isinstance(value, list):
         head_type = value[0]
@@ -132,13 +134,13 @@ def change_value(sysadmin, key, value):
 def change_type(sysadmin, key, newtype):
     existing = sysadmin.get(key)
     if existing.status == sysadminctl_pb2.KEY_NOT_FOUND:
-        print "Key %s must exist to have it's type changed" % key
+        print("Key {} must exist to have it's type changed".format(key))
         return
     oldtype = str(existing.get.kvs[0].value.WhichOneof("value"))
     value = UnpackFromProto(existing.get.kvs[0].value)
     if "list" in oldtype and "list" not in newtype:
         if len(getattr(existing.get.kvs[0].value, oldtype).list) > 1:
-            print "Can't type convert a list larger than one element"
+            print("Can't type convert a list larger than one element")
             return
         value = value[0]
     # sysadmin's type system requires that we remove the old value
@@ -152,7 +154,7 @@ def change_type(sysadmin, key, newtype):
 def rename_key(sysadmin, oldkey, newkey):
     existing = sysadmin.get(oldkey)
     if existing.status == sysadminctl_pb2.KEY_NOT_FOUND:
-        print "Key %s must exist to be renamed" % oldkey
+        print("Key {} must exist to be renamed".format(oldkey))
         return
     sysadmin.erase(oldkey)
     sysadmin.set(newkey, UnpackFromProto(existing.get.kvs[0].value))

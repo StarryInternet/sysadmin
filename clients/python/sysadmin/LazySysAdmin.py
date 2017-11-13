@@ -46,10 +46,11 @@ class NamespaceFetcher(object):
             for i, skey in enumerate(split_keys):
                 running_key = combine_full_key(nested_dict.namespace, skey)
                 if i >= len(split_keys) - 1:
-                    nested_dict.namespace_items[running_key] = UnpackFromProto(kvs.value)
+                    nested_dict.namespace_items[running_key] = UnpackFromProto(
+                        kvs.value)
                 elif running_key not in nested_dict.sub_namespaces:
-                    nested_dict.sub_namespaces[running_key] = NamespaceFetcher(self.sysadmin,
-                                                                               running_key)
+                    fetcher = NamespaceFetcher(self.sysadmin, running_key)
+                    nested_dict.sub_namespaces[running_key] = fetcher
                 nested_dict = nested_dict[skey]
             if split_keys[0] not in returned:
                 returned.add(split_keys[0])

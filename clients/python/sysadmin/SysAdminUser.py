@@ -16,7 +16,8 @@ def FetchAllValues(keys):
             for value in resp.get.kvs:
                 output[value.key] = UnpackFromProto(value.value)
         elif "last." not in arg:
-            raise Exception("Could not find required key. Key %s, Error: %s" % (arg, resp.status))
+            raise Exception("Could not find required key. Key %s, Error: %s" %
+                            (arg, resp.status))
     return condense(output)
 
 
@@ -30,7 +31,8 @@ def condense(uncondensed):
             else:
                 partialDict[keys[0]] = value
         else:
-            if keys[0] in partialDict and not isinstance(partialDict[keys[0]], dict):
+            dict_instance = isinstance(partialDict[keys[0]], dict)
+            if keys[0] in partialDict and not dict_instance:
                 partialDict["{" + keys[0] + "}"] = partialDict[keys[0]]
                 del partialDict[keys[0]]
             if keys[0] not in partialDict:
