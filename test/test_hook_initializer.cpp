@@ -108,8 +108,8 @@ TEST_F(HookInitFixture, HookFulfillingOptionalHooks)
     auto pairs = FulfillHooks(&mMockStorage, hooks).value();
 
     ASSERT_EQ(2, pairs.size());
-    ASSERT_EQ("requiredhook", pairs[1].ToString());
-    ASSERT_EQ("optionalhook", pairs[0].ToString());
+    ASSERT_EQ("requiredhook", pairs[0].ToString());
+    ASSERT_EQ("optionalhook", pairs[1].ToString());
 }
 
 TEST_F(HookInitFixture, HookFulfillingWildcards)
