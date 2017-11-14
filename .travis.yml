@@ -11,9 +11,12 @@ before_install:
 - ./docker_control.sh -b
 script:
 - ./docker_control.sh -t
-after_success:
-- if [ "$TRAVIS_BRANCH" == "master" ]; then
-  docker login -u="$DOCKER_USERNAME" -p "$DOCKER_PASSWORD" ;
-  docker push starryoss/sysadmin:2 ;
-  fi
+deploy:
+  provider: script
+  script: docker_builds/image_deploy.sh $TRAVIS_TAG $DOCKER_USERNAME $DOCKER_PASSWORD
+  on:
+    tags: true
+    all_branches: true
 
+before_cache:
+  - docker logout

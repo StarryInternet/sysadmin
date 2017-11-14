@@ -1,4 +1,4 @@
-FROM starryoss/sysadmin:2
+FROM starryoss/sysadmin-build:latest
 # update this in docker_control.sh
 
 # add user account that should make it easier to work on a synced directory

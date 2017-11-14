@@ -108,12 +108,6 @@ so you shouldn't have to worry about permissions on files you create.
 # Run the container interactively 
 ./docker_control.sh -i
 
-# while in interactive mode you can manually build and test.
-mkdir -p build
-cd build
-cmake ..
-make check
-make
 ```
 
 Non-Dockerized Development

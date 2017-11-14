@@ -1,7 +1,7 @@
 #!/bin/bash
 
-export IMAGE_NAME='starryoss/sysadmin'
-export VERSION='2'
+export IMAGE_NAME='starryoss/sysadmin-build'
+export VERSION='latest'
 export BASE_IMAGE="${IMAGE_NAME}:${VERSION}"
 
 show_help() {
@@ -16,7 +16,8 @@ EOF
 
 while getopts ":btih*:" opt; do
   case $opt in
-    b)  docker pull "${BASE_IMAGE}" || docker build -t "${BASE_IMAGE}" docker_builds/
+    b)  docker pull "${BASE_IMAGE}" || true
+        docker build -t "${IMAGE_NAME}" docker_builds/
         docker build --build-arg=USERID=`id -u` . -t sysadmin_tester
         exit $?
       ;;
