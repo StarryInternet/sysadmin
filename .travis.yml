@@ -8,10 +8,9 @@ env:
 services:
 - docker
 before_install:
-- docker pull starryoss/sysadmin:2 || docker build -t starryoss/sysadmin:2 docker_builds/
-- docker build --build-arg=USERID=`id -u` . -t sysadmin_tester
+- ./docker_control.sh -b
 script:
-- docker run -it --rm -v `pwd`:/home/user/sysadmin -u user --workdir /home/user/sysadmin sysadmin_tester /bin/bash -c "rm -rf /home/user/sysadmin/build && mkdir -p /home/user/sysadmin/build && cd /home/user/sysadmin/build && cmake .. && make check && make "
+- ./docker_control.sh -t
 after_success:
 - if [ "$TRAVIS_BRANCH" == "master" ]; then
   docker login -u="$DOCKER_USERNAME" -p "$DOCKER_PASSWORD" ;
