@@ -76,8 +76,51 @@ Generally speaking, build as follows:
 `make check` runs only sysadmin's tests. If you wish to run the decibel-cpp tests, run
 `make decibel-check`.
 
-If this is your first time, you might have some dependencies which need to be installed
-first.
+Dockerized Development
+======================
+
+For consistancy it's recommended to build and test in Docker. We will try an up to date image
+published, but if it's not on Dockerhub you can build it yourself.  Building the images
+takes some time, but you only need to do it once.
+
+```bash
+ #  make sure you have submodules
+git submodule update --init --recursive
+
+ # build the dependency container. You may also be able to pull this
+ # check for the latest image version in the Dockerfile
+docker pull starryoss/sysadmin:1  || docker build -t starryoss/sysadmin:1 docker_builds/
+
+ # build the interactive container. It creates a user with your UID
+ # so you can sync code easily between your host and build container 
+docker build --build-arg=USERID=`id -u` -t sysadmin_tester .
+
+```
+
+This make an image that includes all the 3rd party dependencies. To build Sysadmin
+inside the container you will start a container with the code mounted in.
+Note that you run as a non-root user inside the container so you shouldn't
+have to worry about permissions on files you create.
+
+```bash
+  # as a single command
+docker run -it --rm -v `pwd`:/home/user/sysadmin -u user \
+  --workdir /home/user/sysadmin sysadmin_tester /bin/bash -c \
+  "rm -rf /home/user/sysadmin/build && mkdir -p /home/user/sysadmin/build && cd /home/user/sysadmin/build && cmake .. && make check && make "
+
+ # as an interactive session
+docker run -it --rm -v `pwd`:/home/user/sysadmin -u user \
+  --workdir /home/user/sysadmin sysadmin_tester /bin/bash
+
+mkdir -p build
+cd build
+cmake ..
+make check
+make
+```
+
+Non-Dockerized Development
+==========================
 
 If you're on linux, the included `third-party-build.sh` will pull and install all
 the necessary dependencies.

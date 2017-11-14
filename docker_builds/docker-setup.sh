@@ -68,6 +68,7 @@ dnf install -y --best --allowerasing \
   yaml-cpp \
   yaml-cpp-devel \
   wget \
+  which \
   git \
   autoconf \
   automake \
@@ -76,6 +77,13 @@ dnf install -y --best --allowerasing \
   libtool \
   openssl-devel \
   libevent-devel \
+  python \
+  python-devel \
+  python-pip \
+  python-virtualenvwrapper \
+  python3 \
+  python3-virtualenv \
+  sudo \
   libuv-devel
 
 
