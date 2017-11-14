@@ -59,7 +59,7 @@ from setuptools import setup
 GENERATED_DIR = os.path.join('sysadmin', 'generated')
 
 setup(name='sysadmin',
-      version='2.6.0',
+      version='1.1.0',
       description='Control sysadmin',
       cmdclass={
           'build': build_command(GENERATED_DIR),
