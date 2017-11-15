@@ -8,7 +8,7 @@ show_help() {
 cat << EOF
 Usage: ${0##*/} [-hbti]
  -h          display this help and exit
- -b          build images
+ -b          pull/build dependency image, then build user image
  -t          build and test. Non-interactive
  -i          run container interactively
 EOF
@@ -16,8 +16,7 @@ EOF
 
 while getopts ":btih*:" opt; do
   case $opt in
-    b)  docker pull "${BASE_IMAGE}" || true
-        docker build -t "${IMAGE_NAME}" docker_builds/
+    b)  docker build --pull -t "${IMAGE_NAME}" docker_builds/
         docker build --build-arg=USERID=`id -u` . -t sysadmin_tester
         exit $?
       ;;
