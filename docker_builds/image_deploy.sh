@@ -14,5 +14,6 @@ fi
 # retag the image we made earlier
 docker image tag starryoss/sysadmin-build:latest "starryoss/sysadmin-build:${TAG}"
 
-echo "$DOCKER_PASSWORD" | docker login --password-stdin -u="$DOCKER_USERNAME"
+docker login --password="$DOCKER_PASSWORD" --username="$DOCKER_USERNAME"
+
 docker push "starryoss/sysadmin-build:${TAG}"
