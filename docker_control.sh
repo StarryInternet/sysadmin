@@ -1,23 +1,26 @@
 #!/bin/bash
 
 export IMAGE_NAME='starryoss/sysadmin-build'
-export VERSION='latest'
-export BASE_IMAGE="${IMAGE_NAME}:${VERSION}"
+export NEW_TAG=":${2}"
 
 show_help() {
 cat << EOF
 Usage: ${0##*/} [-hbti]
  -h          display this help and exit
- -b          pull/build dependency image, then build user image
+ -d          build dependency image
+ -b          build the user image from the dependency image
  -t          build and test. Non-interactive
  -i          run container interactively
 EOF
 }
 
-while getopts ":btih*:" opt; do
+while getopts ":bdtih*:" opt; do
   case $opt in
-    b)  docker build --pull -t "${IMAGE_NAME}" docker_builds/
-        docker build --build-arg=USERID=`id -u` . -t sysadmin_tester
+    d)  docker build -t "${IMAGE_NAME}${NEW_TAG}" docker_builds/
+        exit $?
+      ;;
+
+    b)  docker build --build-arg=USERID=`id -u` . -t sysadmin_tester
         exit $?
       ;;
     t)  docker run -t --rm -v `pwd`:/home/user/sysadmin -u user --workdir /home/user/sysadmin sysadmin_tester \

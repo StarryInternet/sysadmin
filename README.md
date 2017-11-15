@@ -79,8 +79,9 @@ Generally speaking, build as follows:
 Dockerized Development
 ======================
 
-For consistancy it's recommended to build and test in Docker. We will try an up to date image
-published, but if it's not on Dockerhub you can build it yourself. 
+For consistancy it's recommended to build and test in Docker.
+We will try an up to date dependency image published to
+[Dockerhub](https://hub.docker.com/r/starryoss/sysadmin-build/).
 
 The docker commands are wrapped in the docker_control.sh script. 
 
@@ -88,26 +89,26 @@ The docker commands are wrapped in the docker_control.sh script.
  #  make sure you have submodules
 git submodule update --init --recursive
 
- # Attempt to pull the dependency container. If that fails 
- you will build it yourself. 
+ # Pull the dependency image and build the user image.
 ./docker_control.sh -b
 
-
+# You should not need to do this, but if you really want
+# to build the dependency image you can with:
+./docker_control.sh -d latest
 ```
 
-This make an image that includes all the 3rd party dependencies. To build Sysadmin
-inside the container you will start a container with the code mounted in.
-Note that you run as a non-root user with your host UID inside the container
-so you shouldn't have to worry about permissions on files you create.
+This pulls the dependency image and creates a "user" image for running builds.
+To build Sysadmin inside the container you will start a container with the
+code mounted in. Note that you run as a non-root user with your host UID
+inside the container so you shouldn't have to worry about permissions on
+files you create.
 
 ```bash
 # build and test in a single command. Non-interactive 
 ./docker_control.sh -t
 
-
 # Run the container interactively 
 ./docker_control.sh -i
-
 ```
 
 Non-Dockerized Development
