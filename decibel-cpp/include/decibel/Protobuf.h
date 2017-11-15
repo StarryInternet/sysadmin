@@ -100,14 +100,19 @@ struct ProtobufSetter
 
 DEFINE_PROTOBUF_FIELD_MAPPING(int32_t, Int32);
 DEFINE_PROTOBUF_FIELD_MAPPING(int64_t, Int64);
-DEFINE_PROTOBUF_FIELD_MAPPING(long, Int64);
 DEFINE_PROTOBUF_FIELD_MAPPING(uint32_t, UInt32);
 DEFINE_PROTOBUF_FIELD_MAPPING(uint64_t, UInt64);
-DEFINE_PROTOBUF_FIELD_MAPPING(unsigned long, UInt64);
 DEFINE_PROTOBUF_FIELD_MAPPING(float, Float);
 DEFINE_PROTOBUF_FIELD_MAPPING(double, Double);
 DEFINE_PROTOBUF_FIELD_MAPPING(bool, Bool);
 DEFINE_PROTOBUF_FIELD_MAPPING(std::string, String);
+
+// I've no idea why these need to be defined on mac, something to do with
+// differences in the stdint.h differences in clang
+#if defined __APPLE__
+DEFINE_PROTOBUF_FIELD_MAPPING(long, Int64);
+DEFINE_PROTOBUF_FIELD_MAPPING(unsigned long, UInt64);
+#endif
 
 template <typename T>
 void SetMessageField(google::protobuf::Message* pMessage,

@@ -76,8 +76,43 @@ Generally speaking, build as follows:
 `make check` runs only sysadmin's tests. If you wish to run the decibel-cpp tests, run
 `make decibel-check`.
 
-If this is your first time, you might have some dependencies which need to be installed
-first.
+Dockerized Development
+======================
+
+For consistency it's recommended to build and test in Docker.
+We will try an up to date dependency image published to
+[Dockerhub](https://hub.docker.com/r/starryoss/sysadmin-build/).
+
+The docker commands are wrapped in the docker_control.sh script. 
+
+```bash
+ #  make sure you have submodules
+git submodule update --init --recursive
+
+ # Pull the dependency image and build the user image.
+./docker_control.sh -b
+
+# You should not need to do this, but if you really want
+# to build the dependency image you can with:
+./docker_control.sh -d latest
+```
+
+This pulls the dependency image and creates a "user" image for running builds.
+To build Sysadmin inside the container you will start a container with the
+code mounted in. Note that you run as a non-root user with your host UID
+inside the container so you shouldn't have to worry about permissions on
+files you create.
+
+```bash
+# build and test in a single command. Non-interactive 
+./docker_control.sh -t
+
+# Run the container interactively 
+./docker_control.sh -i
+```
+
+Non-Dockerized Development
+==========================
 
 If you're on linux, the included `third-party-build.sh` will pull and install all
 the necessary dependencies.

@@ -1,0 +1,26 @@
+sudo: required
+
+env:
+  global:
+  - secure: Nk0lL86bdT9HlUzgFGz3XCckTdss0cjZY9mzbNh2XttyMxRws4ar62PNuYHHgM8h4NIuIzdiCC+ulrTVQgqx4ui/2SxkAUgFrSKlYrdfKEIYgTEa/RkRCYrLs40OEqOgxKDhwudi6c3Vx5J3dWBllrFKIU4C3heOJIibVmvQrarZojQc5bAimKFAXl9ZobezD3VtkW+az9lSzYN93ypdo3yAflTPPWfvF/rDVTz2avJsExtPv43f+J1mQj+AiiU4L0qXkHwBV+a+A/ZqHjmreSyUmShFXX7bn9qcdb6SKQBbS/i/qGahUVrbJ4lPkpjAHEmZ8fi6yz8nj3GoahcA9sQ6NgpLtSPhy47GLeDwdMoOTq/lrwKPPAwPTUjrGeM/VfKBFiWa12J30EMH5Nv2EzpNlY3bEodRIQSiN02G6xzfyK7XDyg4nUMraIPwCs3lAv4wEl3LIImMkyOnQexE0oFkCEAOMHde0VszTUphPnNDLMY6VaMls1JVzTTgWO8e1GGQVB4lISPDLehTMLnJZE43zrHrhEf7oA3O6YtRezpuB+7wJ3YfNsPQh5FQ7GMAhAufH5ss/Ql05D8WfCjUmaFkbagixcUozaNKfct6MFgWRUw5fdXAd37A6DoCeRXoO9vH7nTDm443aG2uZYavdGGjNCPTnq2atOjHj6itRbc=
+  - secure: CrKt1gN2mcR8quetGs6CWSVSNPQoG0irsGztYhkGZusjC9blZzPyLndNwfyVDqt3m0dSQYow9p++Z1au08EhB29yYPb93j6KDCVNK+A0wWKY1gExA9En6sp1k9WyzHFSCs/Xq42vT4tNjTZinw+Qk1Wwc/bqeL1zpbQ8KmjsMPrdGqJZiuRlH9KNAHUuAFXR+yffokEMb43yD+wGfKfN0DAe4Z9O3KgWsoCg8FLiPDDjuf56/RjQH6vc2Jfn/8TjNY1h7ZIiWMwLrxqvKedt9bSRiafApgSCR+IWJzmo9ZsDHyV0R+wxKhZRHTF4kfAejDOKopMeOqaybbw/HywpOVc8z7AHMfRxKMt3Oiz6CP3CDq/VZoK9uQvn6m/+tnQ1XvEWwh3Z+g0GnKFJhMB03AlBJu1ngv5wPLzzfX81Mt02DLMOhlzeKWBRvohgovF74u3mGCn6uS+NG0bw8wqKImLuqqeQCJjSHNUXASZwLFv95LURhZu3GkRquupqiJ4cR2SESukPiBdhI4imkSCYuwGpEuv/4NJuBqM5otUHygf6XhUSgnLqqfAOoDdPYRYXt2VPvgbvr2pJ6hMbdTGbsJdFHW4nCU5abQ0yvxqrw8NrgfHYwkvYTeTzr1oDc+P0bggw1TrQUmoFgBtmie8iB0NI8XeOgot5ShlvEfjyuMo=
+
+services:
+- docker
+before_install:
+- ./docker_control.sh -b
+script:
+- ./docker_control.sh -t
+deploy:
+  - provider: script
+    script: docker_builds/image_deploy.sh latest $DOCKER_USERNAME $DOCKER_PASSWORD
+    on:
+      branch: master
+  - provider: script
+    script: docker_builds/image_deploy.sh $TRAVIS_TAG $DOCKER_USERNAME $DOCKER_PASSWORD
+    on:
+      tags: true
+      all_branches: true
+
+before_cache:
+  - docker logout
