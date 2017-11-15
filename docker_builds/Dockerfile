@@ -1,7 +1,5 @@
 FROM fedora:26
 
-RUN mkdir /var/tmp/setup && mkdir /var/tmp/workdir
-
 RUN dnf update -y && dnf install -y --best --allowerasing \
     bash \
     boost \
@@ -37,10 +35,9 @@ RUN dnf update -y && dnf install -y --best --allowerasing \
     python3-virtualenv \
     sudo \
     libuv-devel && \
-    dnf clean all
-
-
-RUN WORKDIR="/var/tmp/workdir" && \
+    dnf clean all && \
+    mkdir /var/tmp/setup && mkdir /var/tmp/workdir && \
+    WORKDIR="/var/tmp/workdir" && \
     INSTALL_PREFIX="/usr" && \
     AMQP_CPP_VERSION="2.6.2" && \
     AMQP_CPP_DIR_NAME="AMQP-CPP-${AMQP_CPP_VERSION}" && \
@@ -70,4 +67,4 @@ RUN WORKDIR="/var/tmp/workdir" && \
     /usr/bin/make install && \
     popd && \
     popd && \
-    rm -rf "${WORKDIR}"
+    rm -rf /var/tmp

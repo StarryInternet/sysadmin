@@ -20,7 +20,9 @@ while getopts ":bdtih*:" opt; do
         exit $?
       ;;
 
-    b)  docker build --build-arg=USERID=`id -u` . -t sysadmin_tester
+    b)  docker pull "${IMAGE_NAME}"  # pull Dockerhub image
+        docker build --cache-from="${IMAGE_NAME}" -t "${IMAGE_NAME}:latest" docker_builds/  # build using DH image as cache
+        docker build --build-arg=USERID=`id -u` . -t sysadmin_tester
         exit $?
       ;;
     t)  docker run -t --rm -v `pwd`:/home/user/sysadmin -u user --workdir /home/user/sysadmin sysadmin_tester \
