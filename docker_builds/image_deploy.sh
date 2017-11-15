@@ -1,11 +1,12 @@
 #!/bin/bash
 set +x
+set -e
 
 TAG=$1
 DOCKER_USERNAME=$2
 DOCKER_PASSWORD=$3
 
-if [ ! -z "${DOCKER_PASSWORD+x}" ]; then
+if [ -z "${DOCKER_PASSWORD}" ]; then
     echo "Not enough args"
     exit 1
 fi
