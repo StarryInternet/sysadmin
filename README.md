@@ -79,7 +79,7 @@ Generally speaking, build as follows:
 Dockerized Development
 ======================
 
-For consistancy it's recommended to build and test in Docker.
+For consistency it's recommended to build and test in Docker.
 We will try an up to date dependency image published to
 [Dockerhub](https://hub.docker.com/r/starryoss/sysadmin-build/).
 
