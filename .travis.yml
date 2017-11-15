@@ -12,11 +12,15 @@ before_install:
 script:
 - ./docker_control.sh -t
 deploy:
-  provider: script
-  script: docker_builds/image_deploy.sh $TRAVIS_TAG $DOCKER_USERNAME $DOCKER_PASSWORD
-  on:
-    tags: true
-    all_branches: true
+  - provider: script
+    script: docker_builds/image_deploy.sh latest $DOCKER_USERNAME $DOCKER_PASSWORD
+    on:
+      branch: master
+  - provider: script
+    script: docker_builds/image_deploy.sh $TRAVIS_TAG $DOCKER_USERNAME $DOCKER_PASSWORD
+    on:
+      tags: true
+      all_branches: true
 
 before_cache:
   - docker logout
