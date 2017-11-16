@@ -5,8 +5,8 @@ name = "sysadmin-bindings"
 # we don't want to go to 1.0 until we have the api finalized
 # http://doc.crates.io/manifest.html#the-version-field
 # https://github.com/StarryInternet/sysadmin
-version = "0.0.1"
-authors = ["Matt McKay <mmckay@starry.com>"]
+version = "0.0.2"
+authors = ["StarryInternet Open Source <oss@starry.com>"]
 include = [
     "build.rs",
     "src/*.rs",
