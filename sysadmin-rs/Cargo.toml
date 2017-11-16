@@ -1,7 +1,27 @@
 [package]
-name = "sysadmin"
-version = "0.1.0"
-authors = ["Matt McKay <mckaymatt@gmail.com>"]
+name = "sysadmin-bindings"
+# The version will eventually match StarryInternet/sysadmin
+# but since crates.io bakes in the concept of semantic versioning
+# we don't want to go to 1.0 until we have the api finalized
+# http://doc.crates.io/manifest.html#the-version-field
+# https://github.com/StarryInternet/sysadmin
+version = "0.0.1"
+authors = ["Matt McKay <mmckay@starry.com>"]
+include = [
+    "build.rs",
+    "src/*.rs",
+    "src/sysadminctl.proto",
+    "README.md",
+    "Cargo.toml",
+]
+exclude = ["sysadmin-api/README.md"]
+
+readme = "README.md"
+keywords = ["sysadmin", "StarryInternet"]
+license = "Apache-2.0"
+description = "Rust bindings for StarryInternet/sysadmin. Sysadmin is an embedded database and system configuration tool"
+homepage = "https://github.com/StarryInternet/sysadmin"
+repository = "https://github.com/StarryInternet/sysadmin"
 
 [dependencies]
 protobuf = "1.4.2"
@@ -12,3 +32,4 @@ byteorder = "1.1.0"
 
 [build-dependencies]
 protoc-rust = "1.4"
+
