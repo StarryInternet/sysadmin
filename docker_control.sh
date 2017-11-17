@@ -33,7 +33,7 @@ while getopts ":bdtih*:" opt; do
            cmake .. && make check && make "
         exit $?
       ;;
-    i)  docker run -it --rm -v `pwd`:/home/user/sysadmin -u user \
+    i)  docker run -it --rm --net=host -v `pwd`:/home/user/sysadmin -u user \
           --workdir /home/user/sysadmin sysadmin_tester /bin/bash
         exit $?
       ;;
