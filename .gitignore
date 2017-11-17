@@ -44,8 +44,3 @@ scripts/venv
 
 build/
 scripts/build/
-scripts/dist/
-sysadmin-rs/target
-# http://doc.crates.io/guide.html#cargotoml-vs-cargolock
-clients/rust/Cargo.lock
-clients/rust/target
