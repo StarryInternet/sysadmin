@@ -47,4 +47,5 @@ scripts/build/
 scripts/dist/
 sysadmin-rs/target
 # http://doc.crates.io/guide.html#cargotoml-vs-cargolock
-sysadmin-rs/Cargo.lock
+clients/rust/Cargo.lock
+clients/rust/target
