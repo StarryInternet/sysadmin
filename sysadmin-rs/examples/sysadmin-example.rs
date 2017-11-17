@@ -1,9 +1,9 @@
-extern crate sysadmin;
+extern crate sysadmin_bindings;
 extern crate protobuf;
 
 use std::time::Duration;
 use std::net::{IpAddr, Ipv4Addr, SocketAddr};
-use sysadmin::sysadminctl::{ConfigValue, Set, Get, Commit, CommitConfig, Response};
+use sysadmin_bindings::sysadminctl::{ConfigValue, Set, Get, Commit, CommitConfig, Response};
 
 
 /// Available Payloads:
@@ -20,10 +20,11 @@ use sysadmin::sysadminctl::{ConfigValue, Set, Get, Commit, CommitConfig, Respons
 ///     Blame
 ///     InFlight
 
-fn make_client() -> sysadmin::SysAdminClient {
+fn make_client() -> sysadmin_bindings::SysAdminClient {
     let default_timeout = Duration::new(2, 0);
     let socket = SocketAddr::new(IpAddr::V4(Ipv4Addr::new(127, 0, 0, 1)), 4000_u16);
-    let sysadminclient = sysadmin::SysAdminClient::new(socket, default_timeout, 0_u32, 1_u32);
+    let sysadminclient =
+        sysadmin_bindings::SysAdminClient::new(socket, default_timeout, 0_u32, 1_u32);
     sysadminclient
 }
 
@@ -36,7 +37,6 @@ fn make_set() -> Set {
     set
 }
 
-
 fn make_commit() -> Commit {
     let mut commit = Commit::new();
     commit.set_config(CommitConfig::DEFAULT);
@@ -48,8 +48,6 @@ fn make_get() -> Get {
     get.set_key("fizz".to_string());
     get
 }
-
-
 
 fn print_resp(resp: Result<Response, protobuf::error::ProtobufError>) {
     match resp {

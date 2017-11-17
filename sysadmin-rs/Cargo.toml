@@ -5,7 +5,7 @@ name = "sysadmin-bindings"
 # we don't want to go to 1.0 until we have the api finalized
 # http://doc.crates.io/manifest.html#the-version-field
 # https://github.com/StarryInternet/sysadmin
-version = "0.0.2"
+version = "0.0.3"
 authors = ["StarryInternet Open Source <oss@starry.com>"]
 include = [
     "build.rs",
@@ -15,7 +15,7 @@ include = [
     "Cargo.toml",
 ]
 exclude = ["sysadmin-api/README.md"]
-
+license-file = "LICENSE"
 readme = "README.md"
 keywords = ["sysadmin", "StarryInternet"]
 license = "Apache-2.0"
