@@ -5,16 +5,17 @@ export NEW_TAG=":${2}"
 
 show_help() {
 cat << EOF
-Usage: ${0##*/} [-hbti]
+Usage: ${0##*/} [-dbtish*]
  -h          display this help and exit
  -d          build dependency image
  -b          build the user image from the dependency image
  -t          build and test. Non-interactive
  -i          run container interactively
+ -s          start local sysadmin
 EOF
 }
 
-while getopts ":bdtih*:" opt; do
+while getopts ":dbtish*:" opt; do
   case $opt in
     d)  docker build -t "${IMAGE_NAME}${NEW_TAG}" docker_builds/
         exit $?
@@ -35,6 +36,12 @@ while getopts ":bdtih*:" opt; do
       ;;
     i)  docker run -it --rm --net=host -v `pwd`:/home/user/sysadmin -u user \
           --workdir /home/user/sysadmin sysadmin_tester /bin/bash
+        exit $?
+      ;;
+
+    s)  docker run -it --rm --net=host -v `pwd`:/home/user/sysadmin -u user \
+          --workdir /home/user/sysadmin sysadmin_tester \
+          bash -i -c 'eval ./build/src/sysadmin ./configs/local/config.yaml'
         exit $?
       ;;
     h)  show_help
