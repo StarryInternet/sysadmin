@@ -57,23 +57,24 @@ fn print_resp(resp: Result<Response, protobuf::error::ProtobufError>) {
 }
 
 fn main() {
-    // Build the sysadmin server and run it with:
-    //      ./build/src/sysadmin test/configs/config.yaml
-
+    // Build the sysadmin server:
+    //      ./docker_control.sh -t
+    // and run it with:
+    //      ./docker_control.sh -s
 
     let mut sysadminclient = make_client();
     let set = make_set();
     let commit = make_commit();
     let get = make_get();
 
-    let set_resp: Result<Response, protobuf::error::ProtobufError> = sysadminclient.sender(set);
+    let set_resp: Result<Response, protobuf::error::ProtobufError> = sysadminclient.request(set);
     print_resp(set_resp);
 
-    let commit_resp = sysadminclient.sender(commit);
+    let commit_resp = sysadminclient.request(commit);
     print_resp(commit_resp);
 
 
-    let get_resp = sysadminclient.sender(get);
+    let get_resp = sysadminclient.request(get);
 
     let ref kvs = get_resp.unwrap().take_get().take_kvs()[0];
     assert!(kvs.get_value().get_int32val() == 123_i32);

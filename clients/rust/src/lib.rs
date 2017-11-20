@@ -103,8 +103,8 @@ impl SysAdminClient {
         self
     }
 
-    /// Wraps any payload type in a Command and sends it via tcp
-    pub fn sender<T: Payload>(
+    /// Wraps any payload type in a Command and requests it via tcp
+    pub fn request<T: Payload>(
         &mut self,
         msg: T,
     ) -> Result<sysadminctl::Response, protobuf::error::ProtobufError> {
