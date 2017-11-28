@@ -6,7 +6,7 @@ name = "sysadmin-bindings"
 # http://doc.crates.io/manifest.html#the-version-field
 # https://github.com/StarryInternet/sysadmin
 version = "0.0.4"
-authors = ["StarryInternet Open Source <oss@starry.com>"]
+authors = ["Starry Inc <oss@starry.com>"]
 include = [
     "build.rs",
     "src/*.rs",
@@ -28,7 +28,7 @@ protobuf = "1.4.2"
 bufstream = "0.1.3"
 bytes = "0.4.*"
 byteorder = "1.1.0"
-
+error-chain = "0.11.0"
 
 [build-dependencies]
 protoc-rust = "1.4"
