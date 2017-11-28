@@ -22,6 +22,8 @@ license = "Apache-2.0"
 description = "Rust bindings for StarryInternet/sysadmin. Sysadmin is an embedded database and system configuration tool"
 homepage = "https://github.com/StarryInternet/sysadmin"
 repository = "https://github.com/StarryInternet/sysadmin"
+build = "build.rs"
+
 
 [dependencies]
 protobuf = "1.4.2"
