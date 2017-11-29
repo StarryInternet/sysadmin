@@ -10,6 +10,8 @@ from the root dir of Sysadmin with:
 
 `./docker_control.sh -s`
 
+Note you may need to build Sysadmin first.
+
 Next run tests (which builds the examples) and run the example with:
 
 `cargo test && target/debug/examples/sysadmin-example`

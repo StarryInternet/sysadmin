@@ -1,44 +1,16 @@
-// error-chain begin
+// for error-chain
 #![recursion_limit = "1024"]
-
 #[macro_use]
 extern crate error_chain;
-
-pub mod error_chain_generated_errors {
-    extern crate protobuf;
-    use std;
-    use protobuf::ProtobufError;
-    error_chain! {
-        types {
-            Error, ErrorKind, ResultExt, Result;
-        }
-
-        foreign_links {
-            ProtobufError(ProtobufError);
-            Io(std::io::Error);
-
-        }
-
-        errors {
-            SysadminConnectionError(t: String) {
-                description("failed during connection attempt")
-                display("Network Error: {:?}", t)
-            }
-            SysadminProtocolError(t: String) {
-                description("Error during serialization")
-                display("Sysadmin Protocol Error: {:?}", t)
-            }
-        }
-    }
-}
-pub use error_chain_generated_errors::*;
-//  error-chain end
 
 extern crate protobuf;
 extern crate bufstream;
 extern crate byteorder;
 extern crate bytes;
 pub mod sysadminctl;
+pub mod error_chain_generated_errors;
+#[cfg(test)]
+mod tests;
 
 use std::vec::Vec;
 use std::string::String;
@@ -52,6 +24,8 @@ use protobuf::repeated::RepeatedField;
 
 // I don't see a real reason re-impliment this.
 pub use sysadminctl::StatusCode;
+// wildcard is recommended for error-chain
+pub use error_chain_generated_errors::*;
 
 /// SysAdminClient manages the connection and provides methods
 /// for sending specific commands. Each command returns a response in
@@ -123,7 +97,8 @@ impl SysAdminClient {
     fn send(&mut self, command: sysadminctl::Command) -> Result<sysadminctl::Response> {
         if self.stream.is_none() {
             bail!(ErrorKind::SysadminConnectionError(
-                "Command issued before connection was init".to_string()))
+                "Command issued before connection was init".to_string(),
+            ))
         }
         assert!(command.is_initialized() == true);
         use std::io::Write;
@@ -137,15 +112,13 @@ impl SysAdminClient {
         let mut wtr = vec![];
         wtr.write_u32::<LittleEndian>(size).unwrap();
 
-        {
-            // write to socket
-            let stream = self.stream.as_mut().unwrap();
-            stream.write_all(&wtr)?;
-            stream.write_all(&bytes)?;
-            stream.flush()?;
-        }
 
+        // write to socket
         let mut stream = self.stream.as_mut().unwrap();
+        stream.write_all(&wtr)?;
+        stream.write_all(&bytes)?;
+        stream.flush()?;
+
         // receive response
         let mut cis = protobuf::CodedInputStream::new(&mut stream);
         let resp_size = cis.read_raw_little_endian32().chain_err(|| {
@@ -161,27 +134,23 @@ impl SysAdminClient {
         Ok(resp)
     }
 
-    /// change xid
     #[allow(dead_code)]
     pub fn set_xid(mut self, xid: u32) -> Self {
         self.xid = xid;
         self
     }
 
-    /// change id
     #[allow(dead_code)]
     pub fn set_id(mut self, id: u32) -> Self {
         self.id = id;
         self
     }
 
-    /// change xid
     #[allow(dead_code)]
     pub fn get_xid(&self) -> u32 {
         self.xid
     }
 
-    /// change id
     #[allow(dead_code)]
     pub fn get_id(&self) -> u32 {
         self.id
@@ -194,25 +163,26 @@ impl SysAdminClient {
         self.send(cmd)
     }
 
-    /// send set command and receive SetResponse
-    pub fn set<T: Into<SysadminValue>>(&mut self, key: String, value: T) -> Result<SetResponse> {
+    pub fn set<S: Into<String>, T: Into<SysadminValue>>(
+        &mut self,
+        key: S,
+        value: T,
+    ) -> Result<SetResponse> {
         let set = Set {
-            key: key,
+            key: key.into(),
             value: value,
         };
         let resp = self.request(set.into_buf())?;
         Ok(SetResponse::from(resp))
     }
 
-    /// get command and receive GetResponse
-    pub fn get(&mut self, key: String) -> Result<GetResponse> {
-        let get = Get { key: key };
+    pub fn get<S: Into<String>>(&mut self, key: S) -> Result<GetResponse> {
+        let get = Get { key: key.into() };
         let resp = self.request(get.into_buf())?;
         Ok(GetResponse::from(resp))
 
     }
 
-    /// send commit command and receive CommitResponse
     pub fn commit(&mut self, commit_config: Option<CommitConfig>) -> Result<CommitResponse> {
         let commit = Commit { config: commit_config };
         let resp = self.request(commit.into_buf())?;
@@ -230,10 +200,6 @@ impl SysAdminClient {
 // TODO: implement Blame
 // TODO: implement InFlight
 
-/// message MappedField {
-///     required string key = 1;
-///     optional ConfigValue value = 2;
-/// }
 #[allow(dead_code, non_camel_case_types)]
 #[derive(Debug, Clone, PartialEq)]
 pub struct kvs {
@@ -257,9 +223,6 @@ impl From<sysadminctl::MappedField> for kvs {
     }
 }
 
-/// message GetResponse {
-///     repeated MappedField kvs = 1;
-/// }
 #[allow(dead_code)]
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetResponse {
@@ -301,9 +264,6 @@ impl From<sysadminctl::Response> for SetResponse {
     }
 }
 
-/// message CommitResponse {
-///     required uint32 commit_id = 1;
-/// }
 #[allow(dead_code)]
 #[derive(Debug, Clone, PartialEq)]
 pub struct CommitResponse {
@@ -579,95 +539,4 @@ impl Payload for sysadminctl::InFlight {
     fn set_payload(self, command: &mut sysadminctl::Command) {
         command.set_inflight(self);
     }
-}
-
-
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    #[test]
-    fn test_str() {
-        test_sysadminvalue(123_i32);
-    }
-    #[test]
-    fn test_i32() {
-        test_sysadminvalue(String::from("123"));
-    }
-    #[test]
-    fn test_bool() {
-        test_sysadminvalue(true);
-    }
-    #[test]
-    fn test_i32_list() {
-        test_sysadminvalue(vec![1_i32, 2_i32, 3_i32]);
-    }
-    #[test]
-    fn test_str_list() {
-        test_sysadminvalue(vec![
-            String::from("1"),
-            String::from("2"),
-            String::from("3"),
-        ]);
-    }
-    #[test]
-    fn test_bool_list() {
-        test_sysadminvalue(vec![true, false, true]);
-    }
-
-
-    fn test_sysadminvalue<T: Into<SysadminValue>>(variant: T) {
-        let sysadminvalue: SysadminValue = variant.into();
-        let sv_for_convert = sysadminvalue.clone();
-        let configvalue = sysadminctl::ConfigValue::from(sv_for_convert);
-        let restored_sv = SysadminValue::from(configvalue);
-        assert_eq!(sysadminvalue, restored_sv);
-    }
-
-    #[test]
-    fn test_set_str() {
-        test_set_to_sysadminctl(123_i32);
-    }
-    #[test]
-    fn test_set_i32() {
-        test_set_to_sysadminctl(String::from("123"));
-    }
-    #[test]
-    fn test_set_bool() {
-        test_set_to_sysadminctl(true);
-    }
-    #[test]
-    fn test_set_i32_list() {
-        test_set_to_sysadminctl(vec![1_i32, 2_i32, 3_i32]);
-    }
-    #[test]
-    fn test_set_str_list() {
-        test_set_to_sysadminctl(vec![
-            String::from("1"),
-            String::from("2"),
-            String::from("3"),
-        ]);
-    }
-    #[test]
-    fn test_set_bool_list() {
-        test_set_to_sysadminctl(vec![true, false, true]);
-    }
-
-
-    fn test_set_to_sysadminctl<T: Into<SysadminValue>>(v: T) {
-        use std::clone::Clone;
-        let k = String::from("key");
-        let sysadminvalue: SysadminValue = v.into();
-        let set = Set {
-            key: k.clone(),
-            value: SysadminValue::from(sysadminvalue.clone()),
-        };
-        let mut buf: sysadminctl::Set = set.into_buf();
-        assert_eq!(buf.is_initialized(), true);
-        let buf_val = buf.take_value();
-        // see if configvalue matches
-        assert_eq!(buf_val, sysadminctl::ConfigValue::from(sysadminvalue));
-    }
-
-
 }
