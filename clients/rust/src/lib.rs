@@ -27,10 +27,10 @@ pub use sysadminctl::StatusCode;
 // wildcard is recommended for error-chain
 pub use error_chain_generated_errors::*;
 
-/// SysAdminClient manages the connection and provides methods
+/// SysadminClient manages the connection and provides methods
 /// for sending specific commands. Each command returns a response in
 /// the form of a struct specific to that command.
-/// E.g. "SysAdminClient.get" returns "GetResponse"
+/// E.g. "SysadminClient.get" returns "GetResponse"
 ///
 /// Note that the response structs used by the sysadmin lib are a close,
 /// but not exact, mappings of the protobut defined responses.
@@ -44,16 +44,16 @@ pub use error_chain_generated_errors::*;
 /// https://docs.rs/error-chain/0.11.0/error_chain/example_generated/type.Result.html
 /// [`error_chain Error`]:
 /// https://docs.rs/error-chain/0.11.0/error_chain/example_generated/struct.Error.html
-pub struct SysAdminClient {
+pub struct SysadminClient {
     timeout: Duration,
     xid: u32,
     id: u32,
     stream: Option<TcpStream>,
 }
 
-impl SysAdminClient {
-    pub fn new(timeout: Duration, xid: u32, id: u32) -> SysAdminClient {
-        SysAdminClient {
+impl SysadminClient {
+    pub fn new(timeout: Duration, xid: u32, id: u32) -> SysadminClient {
+        SysadminClient {
             timeout: timeout,
             xid: xid,
             id: id,

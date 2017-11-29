@@ -86,7 +86,7 @@ fn test_set_to_sysadminctl<T: Into<SysadminValue>>(v: T) {
 
 #[test]
 fn test_client_set_get() {
-    let mut client = SysAdminClient::new(Duration::from_secs(2_u64), 1_u32, 1_u32);
+    let mut client = SysadminClient::new(Duration::from_secs(2_u64), 1_u32, 1_u32);
     let e = client.connect("127.0.0.1:9999").unwrap_err();
     assert_eq!(e.description(), "failed during connection attempt");
     assert_eq!(client.get_xid(), &1_u32);
