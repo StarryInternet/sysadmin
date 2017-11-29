@@ -1,5 +1,5 @@
 use super::*;
-
+use std::time::Duration;
 
 #[test]
 fn test_str() {
@@ -82,4 +82,17 @@ fn test_set_to_sysadminctl<T: Into<SysadminValue>>(v: T) {
     let buf_val = buf.take_value();
     // see if configvalue matches
     assert_eq!(buf_val, sysadminctl::ConfigValue::from(sysadminvalue));
+}
+
+#[test]
+fn test_client_set_get() {
+    let mut client = SysAdminClient::new(Duration::from_secs(2_u64), 1_u32, 1_u32);
+    let e = client.connect("127.0.0.1:9999").unwrap_err();
+    assert_eq!(e.description(), "failed during connection attempt");
+    assert_eq!(client.get_xid(), &1_u32);
+    assert_eq!(client.get_id(), &1_u32);
+    client.set_xid(2_u32);
+    client.set_id(2_u32);
+    assert_eq!(client.get_xid(), &2_u32);
+    assert_eq!(client.get_id(), &2_u32);
 }

@@ -134,26 +134,20 @@ impl SysAdminClient {
         Ok(resp)
     }
 
-    #[allow(dead_code)]
-    pub fn set_xid(mut self, xid: u32) -> Self {
+    pub fn set_xid(&mut self, xid: u32) {
         self.xid = xid;
-        self
     }
 
-    #[allow(dead_code)]
-    pub fn set_id(mut self, id: u32) -> Self {
+    pub fn set_id(&mut self, id: u32) {
         self.id = id;
-        self
     }
 
-    #[allow(dead_code)]
-    pub fn get_xid(&self) -> u32 {
-        self.xid
+    pub fn get_xid(&self) -> &u32 {
+        &self.xid
     }
 
-    #[allow(dead_code)]
-    pub fn get_id(&self) -> u32 {
-        self.id
+    pub fn get_id(&self) -> &u32 {
+        &self.id
     }
 
     /// Wraps any payload type in a Command and requests it via tcp
@@ -200,7 +194,7 @@ impl SysAdminClient {
 // TODO: implement Blame
 // TODO: implement InFlight
 
-#[allow(dead_code, non_camel_case_types)]
+#[allow(non_camel_case_types)]
 #[derive(Debug, Clone, PartialEq)]
 pub struct kvs {
     pub key: String,
@@ -223,7 +217,7 @@ impl From<sysadminctl::MappedField> for kvs {
     }
 }
 
-#[allow(dead_code)]
+
 #[derive(Debug, Clone, PartialEq)]
 pub struct GetResponse {
     pub id: u32,
@@ -248,7 +242,6 @@ impl From<sysadminctl::Response> for GetResponse {
 }
 
 
-#[allow(dead_code)]
 #[derive(Debug, Clone, PartialEq)]
 pub struct SetResponse {
     pub id: u32,
@@ -264,7 +257,6 @@ impl From<sysadminctl::Response> for SetResponse {
     }
 }
 
-#[allow(dead_code)]
 #[derive(Debug, Clone, PartialEq)]
 pub struct CommitResponse {
     pub id: u32,
