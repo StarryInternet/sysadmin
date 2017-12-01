@@ -7,7 +7,8 @@ use std::time::Duration;
 // note the wildcard import is recommended for error_chain
 // see https://docs.rs/error-chain
 use sysadmin_bindings::error_chain_generated_errors::*;
-use sysadmin_bindings::SysadminClient;
+use sysadmin_bindings::{SysadminClient, Set, Commit, CommitConfig, CommitResponse};
+
 
 // Available Commands:
 //     Set
@@ -52,10 +53,23 @@ fn run() -> Result<(())> {
     client.connect("127.0.0.1:4000").chain_err(|| {
         "this will fail if sysadmin isn't running locally".to_string()
     })?;
+
+    // commands can sent using functions
     let set_resp = client.set(String::from("foo"), 55_i32)?;
     println!("{:?}", set_resp);
 
-    let com_resp = client.commit(None)?;
+    let com_resp: CommitResponse = client.commit(CommitConfig::default())?;
+    assert_eq!(com_resp.status, sysadmin_bindings::StatusCode::SUCCESS);
+    println!("{:?}", com_resp);
+
+    // or you can create command-specific struct which implement
+    // a method for sending themselves via a borrowed client
+    let set_struct = Set::new("bar", 3);
+    let bar_set_response = set_struct.send_command(&mut client)?;
+    println!("{:?}", bar_set_response);
+
+    let commit_struct = Commit::new(CommitConfig::NO_HOOKS);
+    let com_resp = commit_struct.send_command(&mut client)?;
     assert_eq!(com_resp.status, sysadmin_bindings::StatusCode::SUCCESS);
     println!("{:?}", com_resp);
 

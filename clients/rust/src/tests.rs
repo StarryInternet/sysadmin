@@ -1,6 +1,8 @@
 use super::*;
 use std::time::Duration;
 
+// extern crate serde_json;
+
 #[test]
 fn test_str() {
     test_sysadminvalue(123_i32);
@@ -95,4 +97,56 @@ fn test_client_set_get() {
     client.set_id(2_u32);
     assert_eq!(client.get_xid(), &2_u32);
     assert_eq!(client.get_id(), &2_u32);
+}
+
+#[test]
+fn test_send_command() {
+    let mut client = SysadminClient::new(Duration::from_secs(2_u64), 1_u32, 1_u32);
+    let set_struct = Set::new("bar", 3);
+    let get_struct = Get::new("foo");
+    let commit_struct = Commit::new(CommitConfig::NO_HOOKS);
+    let error_string = "Network Error: \"Command issued before connection was init\"";
+    assert_eq!(
+        set_struct
+            .send_command(&mut client)
+            .unwrap_err()
+            .to_string(),
+        error_string
+    );
+    assert_eq!(
+        get_struct
+            .send_command(&mut client)
+            .unwrap_err()
+            .to_string(),
+        error_string
+    );
+    assert_eq!(
+        commit_struct
+            .send_command(&mut client)
+            .unwrap_err()
+            .to_string(),
+        error_string
+    );
+
+}
+
+#[test]
+fn test_ser_and_deser() {
+    let s_struct = Set::new("bar", vec![true, false]);
+
+    let des = serde_json::to_string(&s_struct).unwrap();
+    let ser: Set = serde_json::from_str(&des).unwrap();
+    assert_eq!(s_struct, ser);
+
+    let s_struct = Get::new("bar");
+
+    let des = serde_json::to_string(&s_struct).unwrap();
+    let ser: Get = serde_json::from_str(&des).unwrap();
+    assert_eq!(s_struct, ser);
+
+    let s_struct = Commit::new(CommitConfig::NO_HOOKS);
+
+    let des = serde_json::to_string(&s_struct).unwrap();
+    let ser: Commit = serde_json::from_str(&des).unwrap();
+    assert_eq!(s_struct, ser);
 }

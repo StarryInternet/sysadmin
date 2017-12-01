@@ -1,5 +1,6 @@
 use std;
-use protobuf::ProtobufError;
+use protobuf;
+use serde_json;
 
 error_chain! {
     types {
@@ -7,9 +8,9 @@ error_chain! {
     }
 
     foreign_links {
-        ProtobufError(ProtobufError);
+        ProtobufError(protobuf::ProtobufError);
         Io(std::io::Error);
-
+        JsonSerde(serde_json::error::Error);
     }
 
     errors {

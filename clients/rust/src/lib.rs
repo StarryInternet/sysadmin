@@ -2,7 +2,10 @@
 #![recursion_limit = "1024"]
 #[macro_use]
 extern crate error_chain;
-
+#[macro_use]
+extern crate serde_derive;
+extern crate serde;
+extern crate serde_json;
 extern crate protobuf;
 extern crate bufstream;
 extern crate byteorder;
@@ -13,6 +16,7 @@ pub mod error_chain_generated_errors;
 mod tests;
 
 use std::vec::Vec;
+use std::default::Default;
 use std::string::String;
 use std::convert::{Into, From};
 use std::time::Duration;
@@ -22,8 +26,6 @@ use protobuf::Message;
 use byteorder::{WriteBytesExt, LittleEndian};
 use protobuf::repeated::RepeatedField;
 
-// I don't see a real reason re-impliment this.
-pub use sysadminctl::StatusCode;
 // wildcard is recommended for error-chain
 pub use error_chain_generated_errors::*;
 
@@ -103,7 +105,6 @@ impl SysadminClient {
         assert!(command.is_initialized() == true);
         use std::io::Write;
 
-
         let size = command.compute_size();
         let bytes = command.write_to_bytes()?;
         assert!(size == bytes.len() as u32);
@@ -111,7 +112,6 @@ impl SysadminClient {
         // get BigEndian vec from u32
         let mut wtr = vec![];
         wtr.write_u32::<LittleEndian>(size).unwrap();
-
 
         // write to socket
         let mut stream = self.stream.as_mut().unwrap();
@@ -162,23 +162,32 @@ impl SysadminClient {
         key: S,
         value: T,
     ) -> Result<SetResponse> {
-        let set = Set {
-            key: key.into(),
-            value: value,
-        };
+        let set = Set::new(key, value);
+        self.set_by_struct(set)
+    }
+
+    fn set_by_struct(&mut self, set: Set) -> Result<SetResponse> {
         let resp = self.request(set.into_buf())?;
         Ok(SetResponse::from(resp))
     }
 
     pub fn get<S: Into<String>>(&mut self, key: S) -> Result<GetResponse> {
-        let get = Get { key: key.into() };
+        let get = Get::new(key);
+        self.get_by_struct(get)
+    }
+
+    fn get_by_struct(&mut self, get: Get) -> Result<GetResponse> {
         let resp = self.request(get.into_buf())?;
         Ok(GetResponse::from(resp))
+    }
+
+    pub fn commit(&mut self, commit_config: CommitConfig) -> Result<CommitResponse> {
+        let commit = Commit::new(commit_config);
+        self.commit_by_struct(commit)
 
     }
 
-    pub fn commit(&mut self, commit_config: Option<CommitConfig>) -> Result<CommitResponse> {
-        let commit = Commit { config: commit_config };
+    fn commit_by_struct(&mut self, commit: Commit) -> Result<CommitResponse> {
         let resp = self.request(commit.into_buf())?;
         Ok(CommitResponse::from(resp))
     }
@@ -195,7 +204,7 @@ impl SysadminClient {
 // TODO: implement InFlight
 
 #[allow(non_camel_case_types)]
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct kvs {
     pub key: String,
     pub value: Option<SysadminValue>,
@@ -217,8 +226,7 @@ impl From<sysadminctl::MappedField> for kvs {
     }
 }
 
-
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct GetResponse {
     pub id: u32,
     pub status: StatusCode,
@@ -235,14 +243,13 @@ impl From<sysadminctl::Response> for GetResponse {
 
         GetResponse {
             id: r.get_id(),
-            status: r.get_status(),
+            status: r.get_status().into(),
             kvs: kvs_vec,
         }
     }
 }
 
-
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct SetResponse {
     pub id: u32,
     pub status: StatusCode,
@@ -252,12 +259,12 @@ impl From<sysadminctl::Response> for SetResponse {
     fn from(r: sysadminctl::Response) -> SetResponse {
         SetResponse {
             id: r.get_id(),
-            status: r.get_status(),
+            status: r.get_status().into(),
         }
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct CommitResponse {
     pub id: u32,
     pub status: StatusCode,
@@ -277,68 +284,114 @@ impl From<sysadminctl::Response> for CommitResponse {
 
         CommitResponse {
             id: response.get_id(),
-            status: response.get_status(),
+            status: response.get_status().into(),
             commit_id: cid,
         }
     }
 }
 
-
-#[derive(Debug, Clone, PartialEq)]
-struct Get {
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Get {
     key: String,
 }
 
 impl Get {
+    pub fn new<S: Into<String>>(k: S) -> Get {
+        Get { key: k.into() }
+    }
+
     fn into_buf(self) -> sysadminctl::Get {
         let mut get = sysadminctl::Get::new();
-        get.set_key(self.key);
+        get.set_key(self.key.into());
         get
+    }
+    pub fn send_command(
+        self,
+        client: &mut SysadminClient,
+    ) -> std::result::Result<GetResponse, error_chain_generated_errors::Error> {
+        client.get_by_struct(self)
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
-struct Set<T: Into<SysadminValue>> {
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Set {
     key: String,
-    value: T,
+    value: SysadminValue,
 }
 
-impl<T> Set<T>
-where
-    T: Into<SysadminValue>,
-{
+impl Set {
+    pub fn new<S: Into<String>, T: Into<SysadminValue>>(k: S, v: T) -> Set {
+        Set {
+            key: k.into(),
+            value: v.into(),
+        }
+    }
+}
+
+impl Set {
     fn into_buf(self) -> sysadminctl::Set {
         let mut set = sysadminctl::Set::new();
         set.set_key(self.key);
-        let sv: SysadminValue = self.value.into();
+        let sv: SysadminValue = self.value;
         let cv: sysadminctl::ConfigValue = sysadminctl::ConfigValue::from(sv);
         set.set_value(cv);
         set
     }
+
+    pub fn send_command(
+        self,
+        client: &mut SysadminClient,
+    ) -> std::result::Result<SetResponse, error_chain_generated_errors::Error> {
+        client.set_by_struct(self)
+    }
 }
 
-struct Commit {
-    config: Option<CommitConfig>,
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct Commit {
+    #[serde(default)]
+    config: CommitConfig,
 }
 
 impl Commit {
+    pub fn new(config: CommitConfig) -> Commit {
+        Commit { config: config }
+    }
+
     fn into_buf(self) -> sysadminctl::Commit {
         let mut commit = sysadminctl::Commit::new();
-        if let Some(config) = self.config {
-            let commitconfig = sysadminctl::CommitConfig::from(config);
-            commit.set_config(commitconfig);
-        }
+        let commitconfig = sysadminctl::CommitConfig::from(self.config);
+        commit.set_config(commitconfig);
         commit
+    }
+
+    pub fn send_command(
+        self,
+        client: &mut SysadminClient,
+    ) -> std::result::Result<CommitResponse, error_chain_generated_errors::Error> {
+        client.commit_by_struct(self)
+    }
+}
+
+impl Default for Commit {
+    fn default() -> Commit {
+        Commit::new(CommitConfig::default())
     }
 }
 
 #[allow(non_camel_case_types)]
-#[derive(PartialEq, Eq, Debug)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub enum CommitConfig {
     DEFAULT = 0,
     TEMPLATE_ONLY = 1,
     NO_HOOKS = 3,
 }
+
+impl Default for CommitConfig {
+    fn default() -> CommitConfig {
+        CommitConfig::DEFAULT
+    }
+}
+
 impl From<CommitConfig> for sysadminctl::CommitConfig {
     fn from(c: CommitConfig) -> sysadminctl::CommitConfig {
         match c {
@@ -349,8 +402,67 @@ impl From<CommitConfig> for sysadminctl::CommitConfig {
     }
 }
 
+#[allow(non_camel_case_types)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub enum StatusCode {
+    SUCCESS,
+    UNKNOWN_ERROR,
+    TYPE_MISMATCH,
+    COMMAND_TRANSLATION_ERROR,
+    KEY_NOT_FOUND,
+    EXTERNAL_PROCESS_ERROR,
+    INVALID_KEY,
+    FAILED_ROLLBACK,
+    LOCKED_QUEUE,
+    HOOK_NOT_FOUND,
+    SUCCESS_KEY_CREATED,
+    MESSAGE_SIZE_ERROR,
+}
 
-#[derive(Clone, Debug, PartialEq)]
+impl From<StatusCode> for sysadminctl::StatusCode {
+    fn from(c: StatusCode) -> sysadminctl::StatusCode {
+        match c {
+            StatusCode::SUCCESS => sysadminctl::StatusCode::SUCCESS,
+            StatusCode::UNKNOWN_ERROR => sysadminctl::StatusCode::UNKNOWN_ERROR,
+            StatusCode::TYPE_MISMATCH => sysadminctl::StatusCode::TYPE_MISMATCH,
+            StatusCode::COMMAND_TRANSLATION_ERROR => {
+                sysadminctl::StatusCode::COMMAND_TRANSLATION_ERROR
+            }
+            StatusCode::KEY_NOT_FOUND => sysadminctl::StatusCode::KEY_NOT_FOUND,
+            StatusCode::EXTERNAL_PROCESS_ERROR => sysadminctl::StatusCode::EXTERNAL_PROCESS_ERROR,
+            StatusCode::INVALID_KEY => sysadminctl::StatusCode::INVALID_KEY,
+            StatusCode::FAILED_ROLLBACK => sysadminctl::StatusCode::FAILED_ROLLBACK,
+            StatusCode::LOCKED_QUEUE => sysadminctl::StatusCode::LOCKED_QUEUE,
+            StatusCode::HOOK_NOT_FOUND => sysadminctl::StatusCode::HOOK_NOT_FOUND,
+            StatusCode::SUCCESS_KEY_CREATED => sysadminctl::StatusCode::SUCCESS_KEY_CREATED,
+            StatusCode::MESSAGE_SIZE_ERROR => sysadminctl::StatusCode::MESSAGE_SIZE_ERROR,
+        }
+    }
+}
+
+impl From<sysadminctl::StatusCode> for StatusCode {
+    fn from(c: sysadminctl::StatusCode) -> StatusCode {
+        match c {
+            sysadminctl::StatusCode::SUCCESS => StatusCode::SUCCESS,
+            sysadminctl::StatusCode::UNKNOWN_ERROR => StatusCode::UNKNOWN_ERROR,
+            sysadminctl::StatusCode::TYPE_MISMATCH => StatusCode::TYPE_MISMATCH,
+            sysadminctl::StatusCode::COMMAND_TRANSLATION_ERROR => {
+                StatusCode::COMMAND_TRANSLATION_ERROR
+            }
+            sysadminctl::StatusCode::KEY_NOT_FOUND => StatusCode::KEY_NOT_FOUND,
+            sysadminctl::StatusCode::EXTERNAL_PROCESS_ERROR => StatusCode::EXTERNAL_PROCESS_ERROR,
+            sysadminctl::StatusCode::INVALID_KEY => StatusCode::INVALID_KEY,
+            sysadminctl::StatusCode::FAILED_ROLLBACK => StatusCode::FAILED_ROLLBACK,
+            sysadminctl::StatusCode::LOCKED_QUEUE => StatusCode::LOCKED_QUEUE,
+            sysadminctl::StatusCode::HOOK_NOT_FOUND => StatusCode::HOOK_NOT_FOUND,
+            sysadminctl::StatusCode::SUCCESS_KEY_CREATED => StatusCode::SUCCESS_KEY_CREATED,
+            sysadminctl::StatusCode::MESSAGE_SIZE_ERROR => StatusCode::MESSAGE_SIZE_ERROR,
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(untagged)]
 pub enum SysadminValue {
     Int32(i32),
     Strval(String),
@@ -369,6 +481,12 @@ impl From<i32> for SysadminValue {
 impl From<String> for SysadminValue {
     fn from(v: String) -> Self {
         SysadminValue::Strval(v)
+    }
+}
+
+impl<'a> From<&'a str> for SysadminValue {
+    fn from(v: &str) -> Self {
+        SysadminValue::Strval(String::from(v))
     }
 }
 
@@ -459,7 +577,6 @@ pub trait Payload {
     /// using the proper command for each payload type
     fn set_payload(self, command: &mut sysadminctl::Command);
 }
-
 
 impl Payload for sysadminctl::Set {
     fn set_payload(self, command: &mut sysadminctl::Command) {
