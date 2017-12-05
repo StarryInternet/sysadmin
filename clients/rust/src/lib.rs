@@ -446,9 +446,7 @@ impl From<sysadminctl::StatusCode> for StatusCode {
             sysadminctl::StatusCode::SUCCESS => StatusCode::SUCCESS,
             sysadminctl::StatusCode::UNKNOWN_ERROR => StatusCode::UNKNOWN_ERROR,
             sysadminctl::StatusCode::TYPE_MISMATCH => StatusCode::TYPE_MISMATCH,
-            sysadminctl::StatusCode::COMMAND_TRANSLATION_ERROR => {
-                StatusCode::COMMAND_TRANSLATION_ERROR
-            }
+            sysadminctl::StatusCode::COMMAND_TRANSLATION_ERROR => StatusCode::COMMAND_TRANSLATION_ERROR,
             sysadminctl::StatusCode::KEY_NOT_FOUND => StatusCode::KEY_NOT_FOUND,
             sysadminctl::StatusCode::EXTERNAL_PROCESS_ERROR => StatusCode::EXTERNAL_PROCESS_ERROR,
             sysadminctl::StatusCode::INVALID_KEY => StatusCode::INVALID_KEY,
