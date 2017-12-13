@@ -1,5 +1,6 @@
 sysadmin
 ========
+[![Build Status](https://travis-ci.org/StarryInternet/sysadmin.svg?branch=master)](https://travis-ci.org/StarryInternet/sysadmin)
 
 Like system administrators in big companies, `sysadmin` configures things
 
