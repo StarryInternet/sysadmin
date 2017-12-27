@@ -23,7 +23,7 @@ public:
     AllCommitHistories(const std::vector<CommitHistory>& commits);
 
     void StoreCommit(const CommitHistory& commit);
-    
+
     boost::optional<CommitHistory> GetCommit(CommitHistory::CommitId commitId);
     boost::optional<CommitHistory> GetChild(CommitHistory::CommitId parentId);
     boost::optional<CommitHistory> DropOldestCommit();

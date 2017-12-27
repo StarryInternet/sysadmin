@@ -49,7 +49,7 @@ public:
                       std::vector<std::shared_ptr<const HookUser>>> HookDump;
     typedef HookTable::TemplatesSet TemplatesToRender;
     typedef HookTable::RunLevelServicesMap ServicesMap;
-    
+
 
     struct HookPipeline
     {
@@ -69,7 +69,7 @@ public:
     folly::Future<folly::Unit> HandleCommit(const ConfigPairList& committed,
                                             bool run_services = true);
 
-    HookManager::HookPipeline GetHooksToRun(const ConfigPairList& committed, 
+    HookManager::HookPipeline GetHooksToRun(const ConfigPairList& committed,
                                             bool run_services = true);
 
     HookManager::HookPipeline GetAllHooks();

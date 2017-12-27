@@ -214,7 +214,7 @@ size_t TransactionManager::LogCommit(const ConfigPairList& toBeCommitted)
 
     mCommitHistory.StoreCommit(commit);
     mStorage->StoreCommit(commit);
-    
+
     DropExcessiveCommits();
 
     return commit.mId;
@@ -264,7 +264,7 @@ bool TransactionManager::CanRollback(const CommitHistory& commitRolledBack)
 {
     auto current = mCommitHistory.GetChild(commitRolledBack.mId);
 
-    while (current) 
+    while (current)
     {
         CommitHistory childCommit = current.get();
         for (const auto& delta : commitRolledBack.mItems)
