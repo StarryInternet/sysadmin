@@ -59,4 +59,3 @@ void FileChangeEvent::ChangeEventCallback(uv_fs_event_t* handle,
 }
 }
 }
-
