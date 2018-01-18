@@ -1,5 +1,6 @@
 sysadmin
 ========
+[![Build Status](https://travis-ci.org/StarryInternet/sysadmin.svg?branch=master)](https://travis-ci.org/StarryInternet/sysadmin)
 
 Like system administrators in big companies, `sysadmin` configures things
 
@@ -83,7 +84,7 @@ For consistency it's recommended to build and test in Docker.
 We will try an up to date dependency image published to
 [Dockerhub](https://hub.docker.com/r/starryoss/sysadmin-build/).
 
-The docker commands are wrapped in the docker_control.sh script. 
+The docker commands are wrapped in the docker_control.sh script.
 
 ```bash
  #  make sure you have submodules
@@ -104,10 +105,10 @@ inside the container so you shouldn't have to worry about permissions on
 files you create.
 
 ```bash
-# build and test in a single command. Non-interactive 
+# build and test in a single command. Non-interactive
 ./docker_control.sh -t
 
-# Run the container interactively 
+# Run the container interactively
 ./docker_control.sh -i
 ```
 

@@ -33,4 +33,3 @@ if (NOT DEFINED BUILD_TESTS OR BUILD_TESTS)
 add_subdirectory(googletest)
 add_subdirectory(test)
 endif()
-
