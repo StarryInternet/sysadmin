@@ -344,7 +344,7 @@ impl From<CommitConfig> for sysadminctl::CommitConfig {
     }
 }
 
-/// Constructs a command that takes no values. 
+/// Constructs a command that takes no values.
 /// The response type is also a param
 macro_rules! no_arg_command {
     ($name:ident, $buf_type:ty, $return_type:ty) => {
@@ -381,7 +381,7 @@ no_arg_command!(Reset, sysadminctl::Reset, GenericResponse);
 no_arg_command!(DumpHooks, sysadminctl::DumpHooks, DumpResponse);
 no_arg_command!(InFlight, sysadminctl::InFlight, GenericResponse);
 
-/// constructs a cmd struct that takes a key and value. 
+/// constructs a cmd struct that takes a key and value.
 /// The name of the key and type of the value are params.
 /// The response type is also a param
 macro_rules! single_arg_command {
