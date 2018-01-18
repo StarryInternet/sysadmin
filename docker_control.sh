@@ -58,7 +58,7 @@ while getopts ":dbtisch*:" opt; do
         docker build --build-arg=USERID="$(id -u)" . -t sysadmin_tester
         exit $?
       ;;
-    t)  clean_state && docker run -t --rm ${VOL_OPTS} ${NET_OPTS} -u user sysadmin_tester \
+    t)  docker run -t --rm ${VOL_OPTS} ${NET_OPTS} -u user sysadmin_tester \
           /bin/bash -i -c \
           "rm -rf /home/user/sysadmin/build && \
            mkdir -p /home/user/sysadmin/build && \
