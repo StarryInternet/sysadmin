@@ -210,20 +210,6 @@ impl From<sysadminctl::Response> for GetResponse {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct SetResponse {
-    pub id: u32,
-    pub status: StatusCode,
-}
-
-impl From<sysadminctl::Response> for SetResponse {
-    fn from(r: sysadminctl::Response) -> SetResponse {
-        SetResponse {
-            id: r.get_id(),
-            status: r.get_status().into(),
-        }
-    }
-}
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct CommitResponse {
@@ -280,7 +266,7 @@ impl Set {
     pub fn send_command(
         self,
         client: &mut SysadminClient,
-    ) -> std::result::Result<SetResponse, error_chain_generated_errors::Error> {
+    ) -> std::result::Result<GenericResponse, error_chain_generated_errors::Error> {
         let resp = client.request(self.into_buf())?;
         Ok(resp.into())
     }
@@ -377,9 +363,9 @@ macro_rules! no_arg_command {
 }
 no_arg_command!(Drop, sysadminctl::Drop, GenericResponse);
 no_arg_command!(FireHooks, sysadminctl::FireHooks, GenericResponse);
-no_arg_command!(Reset, sysadminctl::Reset, GenericResponse);
+no_arg_command!(Reset, sysadminctl::Reset, ResetResponse);
 no_arg_command!(DumpHooks, sysadminctl::DumpHooks, DumpResponse);
-no_arg_command!(InFlight, sysadminctl::InFlight, GenericResponse);
+no_arg_command!(InFlight, sysadminctl::InFlight, InFlightResponse);
 
 /// constructs a cmd struct that takes a key and value.
 /// The name of the key and type of the value are params.
@@ -415,7 +401,7 @@ single_arg_command!(EraseKey, key, String, sysadminctl::EraseKey, set_key, Gener
 single_arg_command!(TriggerHook, hook, String, sysadminctl::TriggerHook, set_hook, GenericResponse);
 single_arg_command!(Blame, key, String, sysadminctl::Blame, set_key, BlameResponse);
 single_arg_command!(Get, key, String, sysadminctl::Get, set_key, GetResponse);
-single_arg_command!(Rollback, id, u32, sysadminctl::Rollback, set_id, GetResponse);
+single_arg_command!(Rollback, id, u32, sysadminctl::Rollback, set_id, GenericResponse);
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct ResetResponse {
