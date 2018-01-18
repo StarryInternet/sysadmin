@@ -156,52 +156,13 @@ impl SysadminClient {
         msg.set_payload(&mut cmd);
         self.send(cmd)
     }
-
-    pub fn set<S: Into<String>, T: Into<SysadminValue>>(
-        &mut self,
-        key: S,
-        value: T,
-    ) -> Result<SetResponse> {
-        let set = Set::new(key, value);
-        self.set_by_struct(set)
-    }
-
-    fn set_by_struct(&mut self, set: Set) -> Result<SetResponse> {
-        let resp = self.request(set.into_buf())?;
-        Ok(SetResponse::from(resp))
-    }
-
-    pub fn get<S: Into<String>>(&mut self, key: S) -> Result<GetResponse> {
-        let get = Get::new(key);
-        self.get_by_struct(get)
-    }
-
-    fn get_by_struct(&mut self, get: Get) -> Result<GetResponse> {
-        let resp = self.request(get.into_buf())?;
-        Ok(GetResponse::from(resp))
-    }
-
-    pub fn commit(&mut self, commit_config: CommitConfig) -> Result<CommitResponse> {
-        let commit = Commit::new(commit_config);
-        self.commit_by_struct(commit)
-
-    }
-
-    fn commit_by_struct(&mut self, commit: Commit) -> Result<CommitResponse> {
-        let resp = self.request(commit.into_buf())?;
-        Ok(CommitResponse::from(resp))
-    }
 }
 
-// TODO: implement Drop
-// TODO: implement FireHooks
-// TODO: implement EraseKey
-// TODO: implement Rollback
-// TODO: implement Reset
-// TODO: implement DumpHooks
-// TODO: implement TriggerHook
-// TODO: implement Blame
-// TODO: implement InFlight
+impl Default for SysadminClient {
+    fn default() -> SysadminClient {
+        SysadminClient::new(Duration::from_secs(10_u64), 1_u32, 1_u32)
+    }
+}
 
 #[allow(non_camel_case_types)]
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -249,20 +210,6 @@ impl From<sysadminctl::Response> for GetResponse {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct SetResponse {
-    pub id: u32,
-    pub status: StatusCode,
-}
-
-impl From<sysadminctl::Response> for SetResponse {
-    fn from(r: sysadminctl::Response) -> SetResponse {
-        SetResponse {
-            id: r.get_id(),
-            status: r.get_status().into(),
-        }
-    }
-}
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct CommitResponse {
@@ -290,28 +237,6 @@ impl From<sysadminctl::Response> for CommitResponse {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
-pub struct Get {
-    key: String,
-}
-
-impl Get {
-    pub fn new<S: Into<String>>(k: S) -> Get {
-        Get { key: k.into() }
-    }
-
-    fn into_buf(self) -> sysadminctl::Get {
-        let mut get = sysadminctl::Get::new();
-        get.set_key(self.key.into());
-        get
-    }
-    pub fn send_command(
-        self,
-        client: &mut SysadminClient,
-    ) -> std::result::Result<GetResponse, error_chain_generated_errors::Error> {
-        client.get_by_struct(self)
-    }
-}
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct Set {
@@ -341,8 +266,9 @@ impl Set {
     pub fn send_command(
         self,
         client: &mut SysadminClient,
-    ) -> std::result::Result<SetResponse, error_chain_generated_errors::Error> {
-        client.set_by_struct(self)
+    ) -> std::result::Result<GenericResponse, error_chain_generated_errors::Error> {
+        let resp = client.request(self.into_buf())?;
+        Ok(resp.into())
     }
 }
 
@@ -368,7 +294,9 @@ impl Commit {
         self,
         client: &mut SysadminClient,
     ) -> std::result::Result<CommitResponse, error_chain_generated_errors::Error> {
-        client.commit_by_struct(self)
+        let resp = client.request(self.into_buf())?;
+        Ok(resp.into())
+
     }
 }
 
@@ -398,6 +326,199 @@ impl From<CommitConfig> for sysadminctl::CommitConfig {
             CommitConfig::DEFAULT => sysadminctl::CommitConfig::DEFAULT,
             CommitConfig::TEMPLATE_ONLY => sysadminctl::CommitConfig::TEMPLATE_ONLY,
             CommitConfig::NO_HOOKS => sysadminctl::CommitConfig::NO_HOOKS,
+        }
+    }
+}
+
+/// Constructs a command that takes no values.
+/// The response type is also a param
+macro_rules! no_arg_command {
+    ($name:ident, $buf_type:ty, $return_type:ty) => {
+
+        #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
+        pub struct $name {}
+
+        impl $name {
+            pub fn new() -> $name {
+                $name{}
+            }
+
+            fn into_buf(self) -> $buf_type {
+                let buf: $buf_type = ::std::default::Default::default();
+                buf
+            }
+
+            pub fn send_command(self, client: &mut SysadminClient)
+            -> std::result::Result<$return_type, error_chain_generated_errors::Error> {
+                let resp = client.request(self.into_buf())?;
+                Ok(resp.into())
+            }
+        }
+        impl Default for $name {
+            fn default() -> $name {
+                $name::new()
+            }
+        }
+    };
+}
+no_arg_command!(Drop, sysadminctl::Drop, GenericResponse);
+no_arg_command!(FireHooks, sysadminctl::FireHooks, GenericResponse);
+no_arg_command!(Reset, sysadminctl::Reset, ResetResponse);
+no_arg_command!(DumpHooks, sysadminctl::DumpHooks, DumpResponse);
+no_arg_command!(InFlight, sysadminctl::InFlight, InFlightResponse);
+
+/// constructs a cmd struct that takes a key and value.
+/// The name of the key and type of the value are params.
+/// The response type is also a param
+macro_rules! single_arg_command {
+    ($name:ident, $keyname:ident, $val_type:ty, $buf_type:ty, $set_cmd:ident, $return_type:ty ) => {
+
+        #[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
+        pub struct $name {
+            $keyname: $val_type
+        }
+
+        impl $name {
+            pub fn new<S: Into<$val_type>>(s: S) -> $name {
+                $name{ $keyname: s.into() }
+            }
+
+            fn into_buf(self) -> $buf_type {
+                let mut buf: $buf_type = ::std::default::Default::default();
+                buf.$set_cmd(self.$keyname);
+                buf
+            }
+
+            pub fn send_command(self, client: &mut SysadminClient)
+            -> std::result::Result<$return_type, error_chain_generated_errors::Error> {
+                let resp = client.request(self.into_buf())?;
+                Ok(resp.into())
+            }
+        }
+    };
+}
+single_arg_command!(EraseKey, key, String, sysadminctl::EraseKey, set_key, GenericResponse);
+single_arg_command!(TriggerHook, hook, String, sysadminctl::TriggerHook, set_hook, GenericResponse);
+single_arg_command!(Blame, key, String, sysadminctl::Blame, set_key, BlameResponse);
+single_arg_command!(Get, key, String, sysadminctl::Get, set_key, GetResponse);
+single_arg_command!(Rollback, id, u32, sysadminctl::Rollback, set_id, GenericResponse);
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct ResetResponse {
+    pub id: u32,
+    pub status: StatusCode,
+    pub commit_id: u32,
+}
+
+impl From<sysadminctl::Response> for ResetResponse {
+    fn from(mut r: sysadminctl::Response) -> ResetResponse {
+        let reset_response = r.take_reset();
+        ResetResponse {
+            id: r.get_id(),
+            status: r.get_status().into(),
+            commit_id: reset_response.get_commit_id(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct DumpResponse {
+    pub id: u32,
+    pub status: StatusCode,
+    pub templatehooks: Vec<String>,
+    pub servicehooks: Vec<String>,
+}
+
+impl From<sysadminctl::Response> for DumpResponse {
+    fn from(mut r: sysadminctl::Response) -> DumpResponse {
+        let mut dump_response = r.take_dump();  // lol
+        let temphook_resp = dump_response.take_templatehooks();
+        let tmpl_vec = temphook_resp.to_vec();
+        let servicehooks_resp = dump_response.take_servicehooks();
+        let serv_vec = servicehooks_resp.to_vec();
+
+        DumpResponse {
+            id: r.get_id(),
+            status: r.get_status().into(),
+            templatehooks: tmpl_vec,
+            servicehooks: serv_vec,
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct BlameEntry {
+    pub commit_id: u32,
+    pub commit_time: String,
+    pub val: SysadminValue,
+}
+
+impl From<sysadminctl::BlameEntry> for BlameEntry {
+    fn from(mut r: sysadminctl::BlameEntry) -> BlameEntry {
+        BlameEntry {
+            commit_id: r.get_commit_id(),
+            commit_time: r.take_commit_time(),
+            val: r.take_val().into(),
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct BlameResponse {
+    pub id: u32,
+    pub status: StatusCode,
+    pub entries: Vec<BlameEntry>,
+}
+
+impl From<sysadminctl::Response> for BlameResponse {
+    fn from(mut r: sysadminctl::Response) -> BlameResponse {
+        let mut blame_response = r.take_blame();
+        let entries = blame_response.take_entries().to_vec();
+        let mut entries_vec: Vec<BlameEntry> = Vec::new();
+        entries.into_iter().for_each(|a| entries_vec.push(BlameEntry::from(a)));
+        BlameResponse {
+            id: r.get_id(),
+            status: r.get_status().into(),
+            entries: entries_vec,
+        }
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct InFlightResponse {
+    pub id: u32,
+    pub status: StatusCode,
+    pub kvs: Vec<kvs>,
+}
+
+impl From<sysadminctl::Response> for InFlightResponse {
+    fn from(mut r: sysadminctl::Response) -> InFlightResponse {
+
+        let mut get_resp = r.take_get();
+        let ctl_vec = get_resp.take_kvs().to_vec();
+        let mut kvs_vec: Vec<kvs> = Vec::new();
+        ctl_vec.into_iter().for_each(|a| kvs_vec.push(kvs::from(a)));
+
+        InFlightResponse {
+            id: r.get_id(),
+            status: r.get_status().into(),
+            kvs: kvs_vec,
+        }
+    }
+}
+
+/// this is an id and status but no payload
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct GenericResponse {
+    pub id: u32,
+    pub status: StatusCode,
+}
+
+impl From<sysadminctl::Response> for GenericResponse {
+    fn from(r: sysadminctl::Response) -> GenericResponse {
+        GenericResponse {
+            id: r.get_id(),
+            status: r.get_status().into(),
         }
     }
 }

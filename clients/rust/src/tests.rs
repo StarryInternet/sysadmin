@@ -101,7 +101,7 @@ fn test_client_set_get() {
 
 #[test]
 fn test_send_command() {
-    let mut client = SysadminClient::new(Duration::from_secs(2_u64), 1_u32, 1_u32);
+    let mut client = SysadminClient::default();
     let set_struct = Set::new("bar", 3);
     let get_struct = Get::new("foo");
     let commit_struct = Commit::new(CommitConfig::NO_HOOKS);
@@ -150,3 +150,20 @@ fn test_ser_and_deser() {
     let ser: Commit = serde_json::from_str(&des).unwrap();
     assert_eq!(s_struct, ser);
 }
+
+macro_rules! test_into_buf {
+    ($name:ident, $buf_type:ty, $sysadmin_type:ty) => {
+        #[test]
+        fn $name() {
+            let sys_type: $sysadmin_type = ::std::default::Default::default();
+            let pbuf: $buf_type = ::std::default::Default::default();
+            let sys_into_buf = sys_type.into_buf();
+            assert_eq!(sys_into_buf, pbuf);
+        }
+    };
+}
+test_into_buf!(test_no_arg_into_buf_drop, sysadminctl::Drop, Drop);
+test_into_buf!(test_no_arg_into_buf_firehooks, sysadminctl::FireHooks, FireHooks);
+test_into_buf!(test_no_arg_into_buf_reset, sysadminctl::Reset, Reset);
+test_into_buf!(test_no_arg_into_buf_dumphooks, sysadminctl::DumpHooks, DumpHooks);
+test_into_buf!(test_no_arg_into_buf_inflight, sysadminctl::InFlight, InFlight);
