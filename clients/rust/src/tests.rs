@@ -1,8 +1,6 @@
 use super::*;
 use std::time::Duration;
 
-// extern crate serde_json;
-
 #[test]
 fn test_str() {
     test_sysadminvalue(123_i32);
