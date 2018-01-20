@@ -10,7 +10,7 @@ extern crate protobuf;
 extern crate bufstream;
 extern crate byteorder;
 extern crate bytes;
-pub mod sysadminctl;
+mod sysadminctl;
 pub mod error_chain_generated_errors;
 #[cfg(test)]
 mod tests;
@@ -691,7 +691,7 @@ impl From<sysadminctl::ConfigValue> for SysadminValue {
     }
 }
 
-pub trait Payload {
+trait Payload {
     /// set_payload adds the payload to a command
     /// using the proper command for each payload type
     fn set_payload(self, command: &mut sysadminctl::Command);
