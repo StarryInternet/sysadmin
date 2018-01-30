@@ -474,8 +474,7 @@ impl From<sysadminctl::Response> for BlameResponse {
     fn from(mut r: sysadminctl::Response) -> BlameResponse {
         let mut blame_response = r.take_blame();
         let entries = blame_response.take_entries().to_vec();
-        let mut entries_vec: Vec<BlameEntry> = Vec::new();
-        entries.into_iter().for_each(|a| entries_vec.push(BlameEntry::from(a)));
+        let entries_vec = entries.into_iter().map(BlameEntry::from).collect();
         BlameResponse {
             id: r.get_id(),
             status: r.get_status().into(),
@@ -496,8 +495,7 @@ impl From<sysadminctl::Response> for InFlightResponse {
 
         let mut get_resp = r.take_get();
         let ctl_vec = get_resp.take_kvs().to_vec();
-        let mut kvs_vec: Vec<kvs> = Vec::new();
-        ctl_vec.into_iter().for_each(|a| kvs_vec.push(kvs::from(a)));
+        let kvs_vec = ctl_vec.into_iter().map(kvs::from).collect();
 
         InFlightResponse {
             id: r.get_id(),

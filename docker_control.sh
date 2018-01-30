@@ -52,12 +52,12 @@ while getopts ":dbtisch*:" opt; do
         docker build --build-arg=USERID="$(id -u)" . -t sysadmin_tester
         exit $?
       ;;
-    t)  docker run -t --rm ${VOL_OPTS} ${NET_OPTS} -u user sysadmin_tester \
+    t)  docker run -it --rm ${VOL_OPTS} ${NET_OPTS} -u user sysadmin_tester \
           /bin/bash -i -c \
-          "rm -rf /home/user/sysadmin/build && \
+          'set -x && rm -rf /home/user/sysadmin/build && \
            mkdir -p /home/user/sysadmin/build && \
            cd /home/user/sysadmin/build && \
-           cmake .. && make check -j8 && make -j8"
+           cmake .. && make check -j $(nproc) && make -j $(nproc)'
         exit $?
       ;;
     i)  docker run -it --rm ${NET_OPTS} ${VOL_OPTS} -u user sysadmin_tester \
