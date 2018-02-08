@@ -348,8 +348,8 @@ macro_rules! no_arg_command {
                 buf
             }
 
-            pub fn send_command(self, client: &mut SysadminClient)
-            -> std::result::Result<$return_type, error_chain_generated_errors::Error> {
+            pub fn send_command(self, client: &mut $crate::SysadminClient)
+            -> std::result::Result<$return_type, $crate::error_chain_generated_errors::Error> {
                 let resp = client.request(self.into_buf())?;
                 Ok(resp.into())
             }
@@ -389,8 +389,8 @@ macro_rules! single_arg_command {
                 buf
             }
 
-            pub fn send_command(self, client: &mut SysadminClient)
-            -> std::result::Result<$return_type, error_chain_generated_errors::Error> {
+            pub fn send_command(self, client: &mut $crate::SysadminClient)
+            -> std::result::Result<$return_type, $crate::error_chain_generated_errors::Error> {
                 let resp = client.request(self.into_buf())?;
                 Ok(resp.into())
             }
