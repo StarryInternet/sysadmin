@@ -1,4 +1,4 @@
-FROM fedora:26
+FROM fedora:27
 
 RUN dnf update -y && dnf install -y --best --allowerasing \
     bash \
@@ -48,7 +48,7 @@ RUN dnf update -y && dnf install -y --best --allowerasing \
     mv "${WORKDIR}/download/${AMQP_CPP_ARCHIVE_NAME}" "${WORKDIR}" && \
     tar -C "${WORKDIR}" -zxf "${WORKDIR}/${AMQP_CPP_ARCHIVE_NAME}" && \
     pushd "${WORKDIR}/${AMQP_CPP_DIR_NAME}" && \
-    /usr/bin/make && \
+    /usr/bin/make -j8 && \
     /usr/bin/make install && \
     ldconfig && \
     popd && \
@@ -63,7 +63,7 @@ RUN dnf update -y && dnf install -y --best --allowerasing \
     pushd folly && \
     autoreconf -ivf && \
     ./configure && \
-    /usr/bin/make && \
+    /usr/bin/make -j8 && \
     /usr/bin/make install && \
     popd && \
     popd && \
