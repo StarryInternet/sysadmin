@@ -2,16 +2,19 @@
 import argparse
 import sys
 
+
 def write_args(arg, args, f):
-    if args != None:
+    if args is not None:
         f.write(arg)
         for i in range(len(args)):
             f.write(args[i])
-            if i != len(args)-1:
+            if i != len(args) - 1:
                 f.write(' ')
 
+
 def main():
-    parser = argparse.ArgumentParser(description="Test program for sysadmin unit tests")
+    parser = argparse.ArgumentParser(
+        description="Test program for sysadmin unit tests")
     parser.add_argument('--template-args', type=str, nargs="*",
                         help="Special Arguments to be sent to templates")
     parser.add_argument('--committed', type=str, nargs="*",

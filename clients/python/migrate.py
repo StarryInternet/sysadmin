@@ -1,4 +1,6 @@
 #!/usr/bin/env python
+from __future__ import print_function
+
 import argparse
 import os
 import subprocess
@@ -12,8 +14,10 @@ from sysadmin.Migrations import SysAdminMigrator
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Migrate sysadmin keys",
-                                     formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser = argparse.ArgumentParser(
+        description="Migrate sysadmin keys",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
     parser.add_argument("migration_file", type=str,
                         help="Absolute path to migration file or directory")
     parser.add_argument("--migration_logs", type=str,
@@ -32,13 +36,13 @@ def main():
     migrations = load_migrations(args.migration_file)
     for i, m in enumerate(migrations):
         if migration_log.check_history(m[1]):
-            print "Migration %s has already run, skipping..." % m[0]
+            print("Migration %s has already run, skipping..." % m[0])
             continue
-        print "Running migration %s" % (m[0])
+        print("Running migration %s" % (m[0]))
         resp = migrator.migrate(dict(m[1]))
         migration_history.append((m[1], resp.commit.commit_id))
         if resp.status != sysadminctl_pb2.SUCCESS and i == len(m) - 1:
-            print "Migration failed, quitting and rolling back"
+            print("Migration failed, quitting and rolling back")
             migration_history.reverse()
             for migration, cid in migration_history:
                 client.rollback(cid)
@@ -46,11 +50,11 @@ def main():
             sys.exit(1)
         migration_log.log_migration(m[1])
     migration_log.save(args.migration_logs)
-    print "Migrations complete, running hooks"
+    print("Migrations complete, running hooks")
     if len(migration_history) > 0:
-        print client.firehooks()
-    print "Hooks complete, finished migrating"
-    print "Syncing filesystem"
+        print(client.firehooks())
+    print("Hooks complete, finished migrating")
+    print("Syncing filesystem")
     subprocess.check_call(['sync'])
     return 0
 

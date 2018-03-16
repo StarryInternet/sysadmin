@@ -7,7 +7,7 @@ from sysadmin.generated import sysadminctl_pb2
 
 def UnpackFromProto(proto):
     attrName = proto.WhichOneof("value")
-    if attrName == None:
+    if attrName is None:
         return "EMPTY_VALUE"
     value = getattr(proto, attrName)
     try:
@@ -66,7 +66,8 @@ def _overriddenTypeUnpack(proto, value, valtype):
                 convertable = value
             else:
                 convertable = [value]
-            outvalue.list.extend(map(lambda x: _convertType(x, valtype), convertable))
+            outvalue.list.extend(
+                map(lambda x: _convertType(x, valtype), convertable))
         else:
             outvalue.SetInParent()
 
