@@ -92,6 +92,25 @@ class SetCommand(object):
         return format_set_output(client.set(args.key, pyvalue))
 
 
+class ModifyCommand(object):
+    def __init__(self, argparser):
+        self.parser = argparser.add_parser("modify")
+        self.parser.add_argument("key", type=str,
+                                 help="key")
+        self.parser.add_argument("value", type=str, nargs="*",
+                                 help="value")
+
+    def run(self, args):
+        client = SysAdminClient(args.host, args.port, args.xid)
+        existing = client.get(args.key)
+        existing_type = get_existing_type(existing)
+        if existing_type is None:
+            return "Key not found: " + args.key
+
+        pyvalue = convertToType(args.value, existing_type)
+        return format_set_output(client.set(args.key, pyvalue))
+
+
 def format_get_output(key, response):
     if response.status == sysadminctl_pb2.SUCCESS:
         return format_kvs(response.get.kvs)
