@@ -62,7 +62,7 @@ def format_kvs(kvs):
     return "\n".join(sorted(kvstrings))
 
 
-def format_set_output(key, response):
+def format_set_output(response):
     if response.status == sysadminctl_pb2.SUCCESS_KEY_CREATED:
         return "Uncommitted created new entry\n" + format_kvs(response.get.kvs)
     elif response.status == sysadminctl_pb2.SUCCESS:
@@ -89,7 +89,7 @@ class SetCommand(object):
             pyvalue = convertToType(args.value, existing_type)
         else:
             pyvalue = convertToType(args.value, args.type)
-        return format_set_output(args.key, client.set(args.key, pyvalue))
+        return format_set_output(client.set(args.key, pyvalue))
 
 
 def format_get_output(key, response):
