@@ -62,7 +62,7 @@ def format_kvs(kvs):
     return "\n".join(sorted(kvstrings))
 
 
-def format_set_output(key, response):
+def format_set_output(response):
     if response.status == sysadminctl_pb2.SUCCESS_KEY_CREATED:
         return "Uncommitted created new entry\n" + format_kvs(response.get.kvs)
     elif response.status == sysadminctl_pb2.SUCCESS:
@@ -89,7 +89,31 @@ class SetCommand(object):
             pyvalue = convertToType(args.value, existing_type)
         else:
             pyvalue = convertToType(args.value, args.type)
-        return format_set_output(args.key, client.set(args.key, pyvalue))
+        return format_set_output(client.set(args.key, pyvalue))
+
+
+class ModifyCommand(object):
+    def __init__(self, argparser):
+        self.parser = argparser.add_parser("modify")
+        self.parser.add_argument("key", type=str,
+                                 help="key")
+        self.parser.add_argument("value", type=str, nargs="*",
+                                 help="value")
+        self.parser.add_argument("--type", type=str, default="str",
+                                 choices=type_choices,
+                                 help="value type, default: str")
+
+    def run(self, args):
+        client = SysAdminClient(args.host, args.port, args.xid)
+        existing = client.get(args.key)
+        existing_type = get_existing_type(existing)
+        if existing_type is None:
+            return "Key not found: " + args.key
+        if args.type != existing_type:
+            return "Expected type: " + existing_type
+
+        pyvalue = convertToType(args.value, existing_type)
+        return format_set_output(client.set(args.key, pyvalue))
 
 
 def format_get_output(key, response):
