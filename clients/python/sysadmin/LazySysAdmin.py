@@ -58,6 +58,8 @@ class NamespaceFetcher(object):
                 elif running_key not in nested_dict.sub_namespaces:
                     fetcher = NamespaceFetcher(self.sysadmin, running_key)
                     nested_dict.sub_namespaces[running_key] = fetcher
+                    nested_dict = fetcher
+                else:
                     nested_dict = nested_dict.sub_namespaces[running_key]
             if split_keys[0] not in returned:
                 returned.add(split_keys[0])
