@@ -32,6 +32,12 @@ class NamespaceFetcher(object):
         return self.namespace_items[key]
 
     def __iter__(self):
+        """Fetch all the paths that start with this node and terminate at a
+        node that contains a value. Then iterate along each path. If the parent
+        does not contain a corresponding NamespaceFetcher object in its
+        sub_namespaces dict then create a new object and add it. Except for the
+        last node of each branch. In that case add the name and value to the
+        parent's namespace_items dict"""
         # We always issue a wildcard get on iteration, largely cause there's
         # no way to know if we've gotten the whole namespace via single gets
         # TODO, some "hints" to this dict could tell it that we have everything
@@ -46,6 +52,7 @@ class NamespaceFetcher(object):
             for i, skey in enumerate(split_keys):
                 running_key = combine_full_key(nested_dict.namespace, skey)
                 if i >= len(split_keys) - 1:
+                    # The end of a path contains a value, but has no children
                     nested_dict.namespace_items[running_key] = UnpackFromProto(
                         kvs.value)
                     nested_dict = nested_dict.namespace_items[running_key]
