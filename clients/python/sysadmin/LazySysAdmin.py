@@ -55,7 +55,6 @@ class NamespaceFetcher(object):
                     # The end of a path contains a value, but has no children
                     nested_dict.namespace_items[running_key] = UnpackFromProto(
                         kvs.value)
-                    nested_dict = nested_dict.namespace_items[running_key]
                 elif running_key not in nested_dict.sub_namespaces:
                     fetcher = NamespaceFetcher(self.sysadmin, running_key)
                     nested_dict.sub_namespaces[running_key] = fetcher
