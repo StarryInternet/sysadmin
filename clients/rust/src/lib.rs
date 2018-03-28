@@ -1,7 +1,6 @@
-// for error-chain
 #![recursion_limit = "1024"]
 #[macro_use]
-extern crate error_chain;
+extern crate failure;
 #[macro_use]
 extern crate serde_derive;
 extern crate serde;
@@ -11,9 +10,13 @@ extern crate bufstream;
 extern crate byteorder;
 extern crate bytes;
 mod sysadminctl;
-pub mod error_chain_generated_errors;
 #[cfg(test)]
 mod tests;
+
+#[macro_use]
+pub mod errors;
+use errors::SysadminErrorKind as ErrorKind;
+type Result<T> = errors::SysadminResult<T>;
 
 use std::vec::Vec;
 use std::default::Default;
@@ -25,9 +28,6 @@ use std::net::{TcpStream, ToSocketAddrs};
 use protobuf::Message;
 use byteorder::{WriteBytesExt, LittleEndian};
 use protobuf::repeated::RepeatedField;
-
-// wildcard is recommended for error-chain
-pub use error_chain_generated_errors::*;
 
 /// SysadminClient manages the connection and provides methods
 /// for sending specific commands. Each command returns a response in
@@ -68,18 +68,18 @@ impl SysadminClient {
     /// "address" will become a SocketAddr using the trait
     /// `[ToSocketAddrs]`: https://doc.rust-lang.org/std/net/trait.ToSocketAddrs.html
     pub fn connect<A: ToSocketAddrs>(&mut self, address: A) -> Result<()> {
-        let stream = TcpStream::connect(address).chain_err(|| {
-            ErrorKind::SysadminConnectionError("Could not connect to Sysadmin".to_string())
+        let stream = TcpStream::connect(address).or_else(|_err| {
+            Err(ErrorKind::SysadminConnectionError("Could not connect to Sysadmin".to_string()))
         })?;
         stream
             .set_write_timeout(Some(self.timeout.clone()))
-            .chain_err(|| {
-                ErrorKind::SysadminConnectionError("Error setting write timeout".to_string())
+            .or_else(|_err| {
+                Err(ErrorKind::SysadminConnectionError("Error setting write timeout".to_string()))
             })?;
         stream
             .set_read_timeout(Some(self.timeout.clone()))
-            .chain_err(|| {
-                ErrorKind::SysadminConnectionError("Error setting read timeout".to_string())
+            .or_else(|_err| {
+                Err(ErrorKind::SysadminConnectionError("Error setting read timeout".to_string()))
             })?;
         self.stream = Some(stream);
 
@@ -121,15 +121,15 @@ impl SysadminClient {
 
         // receive response
         let mut cis = protobuf::CodedInputStream::new(&mut stream);
-        let resp_size = cis.read_raw_little_endian32().chain_err(|| {
-            ErrorKind::SysadminProtocolError("Error reading message size".to_string())
+        let resp_size = cis.read_raw_little_endian32().or_else(|_err| {
+            Err(ErrorKind::SysadminProtocolError("Error reading message size".to_string()))
         })?;
-        let response_bytes = cis.read_raw_bytes(resp_size).chain_err(|| {
-            ErrorKind::SysadminProtocolError("Error reading response from Sysadmin".to_string())
+        let response_bytes = cis.read_raw_bytes(resp_size).or_else(|_err| {
+            Err(ErrorKind::SysadminProtocolError("Error reading response from Sysadmin".to_string()))
         })?;
         let resp = protobuf::parse_from_bytes::<sysadminctl::Response>(&response_bytes)
-            .chain_err(|| {
-                ErrorKind::SysadminProtocolError("Error parsing response from Sysadmin".to_string())
+            .or_else(|_err| {
+                Err(ErrorKind::SysadminProtocolError("Error parsing response from Sysadmin".to_string()))
             })?;
         Ok(resp)
     }
@@ -266,7 +266,7 @@ impl Set {
     pub fn send_command(
         self,
         client: &mut SysadminClient,
-    ) -> std::result::Result<GenericResponse, error_chain_generated_errors::Error> {
+    ) -> std::result::Result<GenericResponse, errors::SysadminError> {
         let resp = client.request(self.into_buf())?;
         Ok(resp.into())
     }
@@ -293,7 +293,7 @@ impl Commit {
     pub fn send_command(
         self,
         client: &mut SysadminClient,
-    ) -> std::result::Result<CommitResponse, error_chain_generated_errors::Error> {
+    ) -> std::result::Result<CommitResponse, errors::SysadminError> {
         let resp = client.request(self.into_buf())?;
         Ok(resp.into())
 
@@ -349,7 +349,7 @@ macro_rules! no_arg_command {
             }
 
             pub fn send_command(self, client: &mut $crate::SysadminClient)
-            -> std::result::Result<$return_type, $crate::error_chain_generated_errors::Error> {
+            -> std::result::Result<$return_type, $crate::errors::SysadminError> {
                 let resp = client.request(self.into_buf())?;
                 Ok(resp.into())
             }
@@ -390,7 +390,7 @@ macro_rules! single_arg_command {
             }
 
             pub fn send_command(self, client: &mut $crate::SysadminClient)
-            -> std::result::Result<$return_type, $crate::error_chain_generated_errors::Error> {
+            -> std::result::Result<$return_type, $crate::errors::SysadminError> {
                 let resp = client.request(self.into_buf())?;
                 Ok(resp.into())
             }
