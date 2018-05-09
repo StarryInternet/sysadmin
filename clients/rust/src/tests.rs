@@ -102,7 +102,7 @@ fn test_send_command() {
     let set_struct = Set::new("bar", 3);
     let get_struct = Get::new("foo");
     let commit_struct = Commit::new(CommitConfig::NO_HOOKS);
-    let error_string = "Network Error: Command issued before connection was init";
+    let error_string = "Sysadmin Connection Error: Command issued before connection was init";
     assert_eq!(
         set_struct
             .send_command(&mut client)
