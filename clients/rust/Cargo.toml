@@ -1,11 +1,6 @@
 [package]
 name = "sysadmin-bindings"
-# The version will eventually match StarryInternet/sysadmin
-# but since crates.io bakes in the concept of semantic versioning
-# we don't want to go to 1.0 until we have the api finalized
-# http://doc.crates.io/manifest.html#the-version-field
-# https://github.com/StarryInternet/sysadmin
-version = "1.0.0"
+version = "2.0.0"
 authors = ["Starry Inc <oss@starry.com>"]
 include = [
     "build.rs",
