@@ -88,7 +88,7 @@ fn test_set_to_sysadminctl<T: Into<SysadminValue>>(v: T) {
 fn test_client_set_get() {
     let mut client = SysadminClient::new(Duration::from_secs(2_u64), 1_u32, 1_u32);
     let e = client.connect("127.0.0.1:9999").unwrap_err();
-    assert_eq!(e.description(), "failed during connection attempt");
+    assert_eq!(e.to_string(), "failed to connect to sysadmin");
     assert_eq!(client.get_xid(), &1_u32);
     assert_eq!(client.get_id(), &1_u32);
     client.set_xid(2_u32);
@@ -103,7 +103,7 @@ fn test_send_command() {
     let set_struct = Set::new("bar", 3);
     let get_struct = Get::new("foo");
     let commit_struct = Commit::new(CommitConfig::NO_HOOKS);
-    let error_string = "Network Error: \"Command issued before connection was init\"";
+    let error_string = "Sysadmin Connection Error: Command issued before connection was init";
     assert_eq!(
         set_struct
             .send_command(&mut client)
