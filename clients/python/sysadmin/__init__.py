@@ -7,10 +7,10 @@ from SysAdminUser import FetchAllValues
 
 
 __all__ = [
-    ConfigTemplateRenderer,
-    SysAdminClient,
-    FetchAllValues,
-    UnpackFromProto,
-    SysAdminMigrator,
-    LazySysAdmin,
+    'ConfigTemplateRenderer',
+    'SysAdminClient',
+    'FetchAllValues',
+    'UnpackFromProto',
+    'SysAdminMigrator',
+    'LazySysAdmin',
 ]
