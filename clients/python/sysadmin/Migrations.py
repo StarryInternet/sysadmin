@@ -17,9 +17,12 @@ def load_migrations(path):
         for fp in sorted(migration_paths):
             with open(fp) as f:
                 migrations.append((fp, yaml.load(f)))
-    else:
+    elif os.path.isfile(path):
         with open(path) as f:
             migrations.append((path, yaml.load(f)))
+    else:
+        print("INFO: Given migrations path (%s) is neither a directory or a "
+                "file. Skipping migrations" % path)
     return migrations
 
 

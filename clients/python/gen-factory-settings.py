@@ -71,7 +71,7 @@ def main():
     finally:
         if sysadmin:
             sysadmin.Stop()
-    print("Configs dumped")
+    print("INFO: Configs dumped")
     return 0
 
 
