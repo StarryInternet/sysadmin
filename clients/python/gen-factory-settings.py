@@ -64,14 +64,17 @@ def main():
         migration_log = MigrationLog()
         if os.path.exists(args.migration_logs):
             migration_log.load(args.migration_logs)
-        migrations = load_migrations(args.migration_file)
-        for m in migrations:
-            migration_log.log_migration(m[1])
+        try:
+            migrations = load_migrations(args.migration_file)
+            for m in migrations:
+                migration_log.log_migration(m[1])
+        except ValueError as e:
+            print("ERROR: %s" % e)
         migration_log.save(args.migration_logs)
     finally:
         if sysadmin:
             sysadmin.Stop()
-    print("Configs dumped")
+    print("INFO: Configs dumped")
     return 0
 
 
