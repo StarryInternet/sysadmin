@@ -21,8 +21,8 @@ def load_migrations(path):
         with open(path) as f:
             migrations.append((path, yaml.load(f)))
     else:
-        print("INFO: Given migrations path (%s) is neither a directory or a "
-                "file. Skipping migrations" % path)
+        raise ValueError('Given migrations path (%s) is neither a directory '
+￼                 'or a file. Skipping migrations' % path)
     return migrations
 
 
