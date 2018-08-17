@@ -33,22 +33,25 @@ def main():
     client = SysAdminClient('localhost', args.port)
     migrator = SysAdminMigrator(client)
     migration_history = []
-    migrations = load_migrations(args.migration_file)
-    for i, m in enumerate(migrations):
-        if migration_log.check_history(m[1]):
-            print("Migration %s has already run, skipping..." % m[0])
-            continue
-        print("Running migration %s" % (m[0]))
-        resp = migrator.migrate(dict(m[1]))
-        migration_history.append((m[1], resp.commit.commit_id))
-        if resp.status != sysadminctl_pb2.SUCCESS and i == len(m) - 1:
-            print("Migration failed, quitting and rolling back")
-            migration_history.reverse()
-            for migration, cid in migration_history:
-                client.rollback(cid)
-                migration_log.redo_migration(migration)
-            sys.exit(1)
-        migration_log.log_migration(m[1])
+    try:
+        migrations = load_migrations(args.migration_file)
+        for i, m in enumerate(migrations):
+            if migration_log.check_history(m[1]):
+                print("Migration %s has already run, skipping..." % m[0])
+                continue
+            print("Running migration %s" % (m[0]))
+            resp = migrator.migrate(dict(m[1]))
+            migration_history.append((m[1], resp.commit.commit_id))
+            if resp.status != sysadminctl_pb2.SUCCESS and i == len(m) - 1:
+                print("Migration failed, quitting and rolling back")
+                migration_history.reverse()
+                for migration, cid in migration_history:
+                    client.rollback(cid)
+                    migration_log.redo_migration(migration)
+                sys.exit(1)
+            migration_log.log_migration(m[1])
+    except ValueError as e:
+        print("ERROR: %s" % e)
     migration_log.save(args.migration_logs)
     print("Migrations complete, running hooks")
     if len(migration_history) > 0:
