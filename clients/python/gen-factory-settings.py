@@ -60,17 +60,25 @@ def main():
         client.commit(sysadminctl_pb2.TEMPLATE_ONLY)
 
         # Here we simply log all migrations that existed when this was run
-        # to prevent them from being run again
-        migration_log = MigrationLog()
-        if os.path.exists(args.migration_logs):
-            migration_log.load(args.migration_logs)
+        # to prevent them from being run again in
+        # future (non-factory reset) upgrades.
+        migrations = []
         try:
             migrations = load_migrations(args.migration_file)
+        except ValueError as e:
+            print("INFO: %s" % e)
+
+        if len(migrations) > 0:
+            migration_log = MigrationLog()
+            if os.path.exists(args.migration_logs):
+                migration_log.load(args.migration_logs)
+
             for m in migrations:
                 migration_log.log_migration(m[1])
-        except ValueError as e:
-            print("ERROR: %s" % e)
-        migration_log.save(args.migration_logs)
+
+            migration_log.save(args.migration_logs)
+        else:
+            print("INFO: No migrations to log")
     finally:
         if sysadmin:
             sysadmin.Stop()
