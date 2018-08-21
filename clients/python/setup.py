@@ -62,9 +62,9 @@ GENERATED_DIR = os.path.join('sysadmin', 'generated')
 
 setup(
     name='py-sysadmin',
-    version='1.2.1',
+    version='1.2.2',
     description='Control sysadmin',
-    author='Eric Brown',
+    author='Starry Inc',
     author_email='oss@starry.com',
     url='https://github.com/StarryInternet/sysadmin',
     install_requires=[
