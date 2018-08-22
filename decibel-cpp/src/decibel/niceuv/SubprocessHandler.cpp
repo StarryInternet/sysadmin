@@ -250,6 +250,8 @@ void SubprocessHandler::TrueProcessExit()
     // it here so it will
     // stop
     uv_unref((uv_handle_t*)mProcessHandle.Get());
+    mProcessHandle.Reset();
+    mProcessHandle.Get()->data = this;
     mPipeHandle.reset(new UvHandle<uv_pipe_t>());
     mErrPipeHandle.reset(new UvHandle<uv_pipe_t>());
     CALL_IF_VALID(mProcessExitCb, mExitStatus);
