@@ -59,12 +59,15 @@ SubprocessHandler::SubprocessHandler(EventLoop* loop,
 {
     mProcessHandle.Get()->data = this;
 
+    memset(mStdioContainer, 0, sizeof(mStdioContainer));
+    memset(&mProcessOptions, 0, sizeof(mProcessOptions));
+
     // stdio container init, only reading stdout right now
     mStdioContainer[0].flags = UV_IGNORE;
     mStdioContainer[1].flags =
-        (uv_stdio_flags)(UV_CREATE_PIPE | UV_READABLE_PIPE);
+        (uv_stdio_flags)(UV_CREATE_PIPE | UV_WRITABLE_PIPE);
     mStdioContainer[2].flags =
-        (uv_stdio_flags)(UV_CREATE_PIPE | UV_READABLE_PIPE);
+        (uv_stdio_flags)(UV_CREATE_PIPE | UV_WRITABLE_PIPE);
 
     // process options init
     char** args = (char**)malloc(sizeof(char*) * (cmd.size() + 1));
@@ -75,11 +78,11 @@ SubprocessHandler::SubprocessHandler(EventLoop* loop,
         args[i][cmd[i].length()] = '\0';
     }
     args[cmd.size()] = NULL;
-    // The docs say I have to do this, but I'm not sure if I actually do
-    mProcessOptions = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+
     mProcessOptions.exit_cb = on_child_exit;
     mProcessOptions.file = args[0];
     mProcessOptions.args = args;
+    mProcessOptions.stdio = mStdioContainer;
     mProcessOptions.stdio_count = 3;
 
     unsigned int flags = 0;
@@ -128,7 +131,6 @@ void SubprocessHandler::RunProcess()
     mStdioContainer[1].data.stream = (uv_stream_t*)mPipeHandle->Get();
     mErrPipeHandle->Get()->data = this;
     mStdioContainer[2].data.stream = (uv_stream_t*)mErrPipeHandle->Get();
-    mProcessOptions.stdio = mStdioContainer;
     mEventLoop->RegisterAndSpawnSubprocess(this);
     uv_read_start(
         (uv_stream_t*)mPipeHandle->Get(), on_alloc, on_read<SubprocessHandler>);
@@ -248,6 +250,8 @@ void SubprocessHandler::TrueProcessExit()
     // it here so it will
     // stop
     uv_unref((uv_handle_t*)mProcessHandle.Get());
+    mProcessHandle.Reset();
+    mProcessHandle.Get()->data = this;
     mPipeHandle.reset(new UvHandle<uv_pipe_t>());
     mErrPipeHandle.reset(new UvHandle<uv_pipe_t>());
     CALL_IF_VALID(mProcessExitCb, mExitStatus);
