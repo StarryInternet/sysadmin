@@ -22,7 +22,7 @@ def load_migrations(path):
             migrations.append((path, yaml.load(f)))
     else:
         raise ValueError('Given migrations path (%s) is neither a directory '
-￼                 'or a file. Skipping migrations' % path)
+                            'or a file. Skipping migrations' % path)
     return migrations
 
 
