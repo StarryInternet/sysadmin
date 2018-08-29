@@ -21,7 +21,7 @@ def rand_uint32():
 
 
 def _unpackIntoProto(proto, value):
-    if isinstance(value, str):
+    if isinstance(value, str) or isinstance(value, unicode):
         proto.strval = value
     elif value is True or value is False:
         proto.boolval = value
