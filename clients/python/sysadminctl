@@ -19,11 +19,43 @@ type_choices = ["str", "int32", "bool", "int32list", "boollist", "stringlist"]
 
 
 def to_bool(strval):
-    return strval.lower() == "true"
+    """Case insensitive utility function to conservatively convert a string
+    value to a python boolean. Only accepted values are true/false, case
+    insensitive
+
+    Args:
+        strval (String): value to convert
+
+    Returns:
+        boolean value
+    """
+    if strval.lower() == "true":
+        return True
+    elif strval.lower() == "false":
+        return False
+    else:
+        raise ValueError(
+                "Given value ({}) cannot be converted to boolean."
+                .format(strval))
 
 
 def convertToType(stringvalue, valuetype):
-    if len(stringvalue):
+    """Convert command line string input to python/sysadmin type.
+
+    Args:
+        stringvalue (String): string value of cmd line args
+        valuetype (String):   sysadmin type name to convert to.
+
+    Returns: stringvalue as the requested sysadmin type.
+    """
+    def handle_lists(itemtype):
+        output = []
+        for item in stringvalue:
+            if len(item) > 0:
+                output.append(itemtype(item))
+        return output
+
+    if len(stringvalue) == 1:
         if valuetype == "str":
             return stringvalue[0]
         if valuetype == "int32":
@@ -31,18 +63,17 @@ def convertToType(stringvalue, valuetype):
         if valuetype == "bool":
             return to_bool(stringvalue[0])
 
-    def handle_lists(itemtype):
-        output = []
-        for item in stringvalue:
-            if len(item) > 0:
-                output.append(itemtype(item))
-        return output
-    if valuetype == "int32list":
-        return handle_lists(int)
-    if valuetype == "boollist":
-        return handle_lists(to_bool)
-    if valuetype == "stringlist":
-        return handle_lists(str)
+    if len(stringvalue) >= 1:
+        if valuetype == "int32list":
+            return handle_lists(int)
+        if valuetype == "boollist":
+            return handle_lists(to_bool)
+        if valuetype == "stringlist":
+            return handle_lists(str)
+
+    raise ValueError(
+            "Given value ({}) could not be converted to type ({})."
+            .format(stringvalue, valuetype))
 
 
 def get_existing_type(response):
@@ -85,35 +116,54 @@ class SetCommand(object):
         client = SysAdminClient(args.host, args.port, args.xid)
         existing = client.get(args.key)
         existing_type = get_existing_type(existing)
-        if existing_type is not None:
-            pyvalue = convertToType(args.value, existing_type)
-        else:
-            pyvalue = convertToType(args.value, args.type)
+
+        new_type = (
+            args.type
+            if existing_type is None
+            else existing_type)
+
+        try:
+            pyvalue = convertToType(args.value, new_type)
+        except ValueError as err:
+            return err
         return format_set_output(client.set(args.key, pyvalue))
 
 
 class ModifyCommand(object):
+    """Modify an existing key.
+
+    Args:
+        key (String):  Name of existing key to modify.
+        value ("str", "int32", "bool", "int32list", "boollist", "stringlist"):
+                       New value of key. Type must match existing key type.
+        type (String): Optional, type name matching sysadmin types.
+    """
     def __init__(self, argparser):
         self.parser = argparser.add_parser("modify")
         self.parser.add_argument("key", type=str,
                                  help="key")
         self.parser.add_argument("value", type=str, nargs="*",
                                  help="value")
-        self.parser.add_argument("--type", type=str, default="str",
+        self.parser.add_argument("--type", type=str,
                                  choices=type_choices,
-                                 help="value type, default: str")
+                                 help="value type")
 
     def run(self, args):
         client = SysAdminClient(args.host, args.port, args.xid)
-        existing = client.get(args.key)
-        existing_type = get_existing_type(existing)
-        if existing_type is None:
-            return "Key not found: " + args.key
-        if args.type != existing_type:
-            return "Expected type: " + existing_type
+        key_response = client.get(args.key)
+        existing_type = get_existing_type(key_response)
 
-        pyvalue = convertToType(args.value, existing_type)
-        return format_set_output(client.set(args.key, pyvalue))
+        if existing_type is None:
+            return "Key not found " + args.key
+
+        if args.type is not None and args.type != existing_type:
+            return "Expected type: " + existing_type
+        else:
+            try:
+                pyvalue = convertToType(args.value, existing_type)
+            except ValueError as err:
+                return err
+            return format_set_output(client.set(args.key, pyvalue))
 
 
 def format_get_output(key, response):
