@@ -86,10 +86,11 @@ def format_kvs(kvs):
     kvstrings = []
     for kv in kvs:
         if kv.value:
+            key_type = kv.value.WhichOneof("value").replace("val", "")
             value = UnpackFromProto(kv.value)
             if isinstance(value, str) or isinstance(value, unicode):
                 value = "\"%s\"" % value
-            kvstrings.append("%s = %s" % (kv.key, value))
+            kvstrings.append("%s = %s, type = %s" % (kv.key, value, key_type))
     return "\n".join(sorted(kvstrings))
 
 
@@ -154,7 +155,7 @@ class ModifyCommand(object):
         existing_type = get_existing_type(key_response)
 
         if existing_type is None:
-            return "Key not found " + args.key
+            return "Key not found: " + args.key
 
         if args.type is not None and args.type != existing_type:
             return "Expected type: " + existing_type
