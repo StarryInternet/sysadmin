@@ -82,7 +82,7 @@ def get_existing_type(response):
     return response.get.kvs[0].value.WhichOneof("value").replace("val", "")
 
 
-def format_kvs(kvs):
+def format_kvs(kvs, verbose=False):
     kvstrings = []
     for kv in kvs:
         if kv.value:
@@ -90,15 +90,22 @@ def format_kvs(kvs):
             value = UnpackFromProto(kv.value)
             if isinstance(value, str) or isinstance(value, unicode):
                 value = "\"%s\"" % value
-            kvstrings.append("%s = %s, type = %s" % (kv.key, value, key_type))
+
+            output_str = (
+                "%s = %s, type = %s" % (kv.key, value, key_type)
+                if verbose
+                else "%s = %s" % (kv.key, value))
+            kvstrings.append(output_str)
     return "\n".join(sorted(kvstrings))
 
 
-def format_set_output(response):
+def format_set_output(response, verbose=False):
     if response.status == sysadminctl_pb2.SUCCESS_KEY_CREATED:
-        return "Uncommitted created new entry\n" + format_kvs(response.get.kvs)
+        return "Uncommitted created new entry\n" + format_kvs(response.get.kvs,
+                verbose)
     elif response.status == sysadminctl_pb2.SUCCESS:
-        return "Uncommitted modified entry\n" + format_kvs(response.get.kvs)
+        return "Uncommitted modified entry\n" + format_kvs(response.get.kvs,
+                verbose)
     return response
 
 
@@ -112,6 +119,8 @@ class SetCommand(object):
         self.parser.add_argument("--type", type=str, default="str",
                                  choices=type_choices,
                                  help="value type, default: str")
+        self.parser.add_argument("-v", "--verbose", action='store_true',
+                                 help="Enable verbose output")
 
     def run(self, args):
         client = SysAdminClient(args.host, args.port, args.xid)
@@ -127,7 +136,7 @@ class SetCommand(object):
             pyvalue = convertToType(args.value, new_type)
         except ValueError as err:
             return err
-        return format_set_output(client.set(args.key, pyvalue))
+        return format_set_output(client.set(args.key, pyvalue), args.verbose)
 
 
 class ModifyCommand(object):
@@ -148,6 +157,8 @@ class ModifyCommand(object):
         self.parser.add_argument("--type", type=str,
                                  choices=type_choices,
                                  help="value type")
+        self.parser.add_argument("-v", "--verbose", action='store_true',
+                                 help="Enable verbose output")
 
     def run(self, args):
         client = SysAdminClient(args.host, args.port, args.xid)
@@ -164,12 +175,14 @@ class ModifyCommand(object):
                 pyvalue = convertToType(args.value, existing_type)
             except ValueError as err:
                 return err
-            return format_set_output(client.set(args.key, pyvalue))
+            return format_set_output(
+                    client.set(args.key, pyvalue),
+                    args.verbose)
 
 
-def format_get_output(key, response):
+def format_get_output(key, response, verbose=False):
     if response.status == sysadminctl_pb2.SUCCESS:
-        return format_kvs(response.get.kvs)
+        return format_kvs(response.get.kvs, verbose)
     elif response.status == sysadminctl_pb2.KEY_NOT_FOUND:
         return "Key not found: " + key
     else:
@@ -181,10 +194,12 @@ class GetCommand(object):
         self.parser = argparser.add_parser("get")
         self.parser.add_argument("key", type=str,
                                  help="key")
+        self.parser.add_argument("-v", "--verbose", action='store_true',
+                                 help="get output with variable type")
 
     def run(self, args):
         client = SysAdminClient(args.host, args.port, args.xid)
-        return format_get_output(args.key, client.get(args.key))
+        return format_get_output(args.key, client.get(args.key), args.verbose)
 
 
 def format_commit_output(response):
