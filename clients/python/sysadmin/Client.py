@@ -1,6 +1,7 @@
 import random
 import socket
 import struct
+import sys
 
 from sysadmin.generated import sysadminctl_pb2
 
@@ -21,7 +22,9 @@ def rand_uint32():
 
 
 def _unpackIntoProto(proto, value):
-    if isinstance(value, str) or isinstance(value, unicode):
+    if isinstance(value, str) or (
+        sys.version_info[0] < 3 and isinstance(value, unicode)
+    ):
         proto.strval = value
     elif value is True or value is False:
         proto.boolval = value
@@ -38,7 +41,7 @@ def _unpackIntoProto(proto, value):
 
 def _convertType(value, newtype):
     if "str" in newtype:
-        return unicode(value)
+        return unicode(value) if sys.version_info[0] < 3 else str(value)
     if "bool" in newtype:
         if isinstance(value, bool):
             return value
@@ -67,7 +70,7 @@ def _overriddenTypeUnpack(proto, value, valtype):
             else:
                 convertable = [value]
             outvalue.list.extend(
-                map(lambda x: _convertType(x, valtype), convertable))
+                list(map(lambda x: _convertType(x, valtype), convertable)))
         else:
             outvalue.SetInParent()
 
@@ -172,7 +175,8 @@ class SysAdminClient(object):
     def _send(self, message):
         def full_recv(sock, recvlen):
             bytes_left = recvlen
-            out_data = ""
+            # This is still a `str` in py2.7, but `bytes` in py3
+            out_data = b""
             while bytes_left > 0:
                 to_read = min(bytes_left, 4096)
                 data = sock.recv(to_read)

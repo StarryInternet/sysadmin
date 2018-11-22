@@ -6,6 +6,7 @@ import inspect
 import random
 import socket
 import sys
+import six
 from sysadmin import SysAdminClient
 from sysadmin import UnpackFromProto
 from sysadmin.generated import sysadminctl_pb2
@@ -364,7 +365,7 @@ def _get_commands_map():
 
 
 def initialize_subcommands(commands, argparser):
-    for (name, command) in commands.iteritems():
+    for (name, command) in six.iteritems(commands):
         inited = command(argparser)
         commands[name] = inited
 
@@ -379,6 +380,7 @@ def main():
     parser.add_argument("--xid", type=int, default=0,
                         help="Transaction xid")
     subparser = parser.add_subparsers(dest="command")
+    subparser.required = True
     command_map = _get_commands_map()
     initialize_subcommands(command_map, subparser)
     args = parser.parse_args()

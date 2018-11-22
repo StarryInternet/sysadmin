@@ -299,8 +299,8 @@ class GetAllKeysTest(SysAdminFixture):
         self.assertEqual(set(["network.dhcp.startip", "network.dhcp.endip",
                               "network.dhcp.interfaces"]),
                          resp)
-        resp = map(lambda x: UnpackFromProto(x.value),
-                   client.get("network.dhcp.*").get.kvs)
+        resp = list(map(lambda x: UnpackFromProto(x.value),
+                        client.get("network.dhcp.*").get.kvs))
         self.assertEqual(3, len(resp))
         self.assertTrue("192.168.1.1" in resp)
         self.assertTrue("192.168.1.100" in resp)
@@ -310,8 +310,8 @@ class GetAllKeysTest(SysAdminFixture):
                               "network.dhcp.interfaces", "network.breakfast",
                               "network.lease"]),
                          resp)
-        resp = map(lambda x: UnpackFromProto(x.value),
-                   client.get("network.*").get.kvs)
+        resp = list(map(lambda x: UnpackFromProto(x.value),
+                        client.get("network.*").get.kvs))
         self.assertEqual(5, len(resp))
         self.assertTrue("192.168.1.1" in resp)
         self.assertTrue("192.168.1.100" in resp)
