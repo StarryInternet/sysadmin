@@ -1,9 +1,9 @@
-from Client import SysAdminClient
-from Client import UnpackFromProto
-from ConfigTemplateRenderer import ConfigTemplateRenderer
-from LazySysAdmin import LazySysAdmin
-from Migrations import SysAdminMigrator
-from SysAdminUser import FetchAllValues
+from sysadmin.Client import SysAdminClient
+from sysadmin.Client import UnpackFromProto
+from sysadmin.ConfigTemplateRenderer import ConfigTemplateRenderer
+from sysadmin.LazySysAdmin import LazySysAdmin
+from sysadmin.Migrations import SysAdminMigrator
+from sysadmin.SysAdminUser import FetchAllValues
 
 
 __all__ = [

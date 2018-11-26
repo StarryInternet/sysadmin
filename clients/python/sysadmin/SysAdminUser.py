@@ -1,3 +1,4 @@
+import six
 from sysadmin import SysAdminClient
 from sysadmin import UnpackFromProto
 from sysadmin.generated import sysadminctl_pb2
@@ -39,7 +40,7 @@ def condense(uncondensed):
                 partialDict[keys[0]] = {}
             innerCondense(partialDict[keys[0]], keys[1:], value)
     output = {}
-    for key, value in uncondensed.iteritems():
+    for key, value in six.iteritems(uncondensed):
         keyparts = key.split(".")
         innerCondense(output, keyparts, value)
     return output

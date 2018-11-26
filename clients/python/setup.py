@@ -73,6 +73,7 @@ setup(
         'protobuf>=3.0,<4.0',
         'pytz>=2016.1',
         'PyYAML>=3.11,<4.0',
+        'six>=1.9,<2.0',
     ],
     extras_require={
         'test': [
@@ -95,7 +96,8 @@ setup(
     ],
     classifiers=[
         'Programming Language :: Python :: 2',
-        'Programming Language :: Python :: 2.6',
-        'Programming Language :: Python :: 2.7'
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3.6',
+        'Programming Language :: Python :: 3.7',
     ]
 )

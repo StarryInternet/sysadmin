@@ -4,6 +4,7 @@ import glob
 import hashlib
 import os
 
+import six
 import yaml
 from sysadmin import SysAdminClient
 from sysadmin import UnpackFromProto
@@ -57,7 +58,7 @@ class MigrationLog(object):
 
 def nested_setter(sysadmin, config, op):
     def inner_set_configs(current, key_prefix):
-        for k, v in current.iteritems():
+        for k, v in six.iteritems(current):
             key = k if key_prefix == '' else '.'.join([key_prefix, k])
             if isinstance(v, dict):
                 inner_set_configs(v, key)
@@ -93,7 +94,7 @@ class SysAdminMigrator(object):
 
     def rename_keys(self, keys):
         for key in keys:
-            oldkey = key.keys()[0]
+            oldkey = list(key.keys())[0]
             newkey = key[oldkey]
             rename_key(self.sysadmin, oldkey, newkey)
 
