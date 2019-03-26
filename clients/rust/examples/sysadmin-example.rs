@@ -1,8 +1,8 @@
-extern crate sysadmin_bindings;
-extern crate protobuf;
 extern crate failure;
+extern crate protobuf;
+extern crate sysadmin_bindings;
 
-use sysadmin_bindings::{SysadminClient, Set, Get, Commit, Drop, CommitConfig, DumpHooks};
+use sysadmin_bindings::{Commit, CommitConfig, Drop, DumpHooks, Get, Set, SysadminClient};
 
 // Available Commands:
 //     Set
@@ -45,7 +45,7 @@ fn run() -> Result<(), failure::Error> {
     // a method for sending itself via a borrowed client
     // this returns a "response" struct
     let set_struct = Set::new("foo", 3_i32);
-    let set_resp =  set_struct.send_command(&mut client)?;
+    let set_resp = set_struct.send_command(&mut client)?;
     println!("{:?}", set_resp);
 
     // until you commit changes, the 'foo' key won't be found
@@ -80,7 +80,10 @@ fn run() -> Result<(), failure::Error> {
 
     // this value was dropped before it was commit so it should not be found
     let get_bar_resp = Get::new("bar").send_command(&mut client)?;
-    assert_eq!(get_bar_resp.status, sysadmin_bindings::StatusCode::KEY_NOT_FOUND);
+    assert_eq!(
+        get_bar_resp.status,
+        sysadmin_bindings::StatusCode::KEY_NOT_FOUND
+    );
 
     // it's possible to see hooks that have been set
     let dumphooks = DumpHooks::new().send_command(&mut client)?;

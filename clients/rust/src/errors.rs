@@ -10,5 +10,5 @@ pub type SysadminResult<T> = ::std::result::Result<T, SysadminError>;
 #[derive(Fail, Debug)]
 pub enum SysadminErrorKind {
     #[fail(display = "Sysadmin Connection Error: {}", _0)]
-    SysadminConnectionError(String),
+    SysadminConnectionError(String)
 }
