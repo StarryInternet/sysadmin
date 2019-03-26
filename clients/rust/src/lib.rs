@@ -36,6 +36,8 @@ pub type Result<T> = errors::SysadminResult<T>;
 /// Lifted `Error` type used throughout this crate.
 pub type Error = errors::SysadminError;
 
+const DEFAULT_COMMAND_TIMEOUT: u64 = 10;
+
 /// SysadminClient manages the connection and provides methods
 /// for sending specific commands. Each command returns a response in
 /// the form of a struct specific to that command.
@@ -79,6 +81,33 @@ impl SysadminClient {
         self.stream = Some(stream);
 
         Ok(())
+    }
+
+    /// Set TCP stream timeout
+    pub fn set_timeout(&mut self, timeout: Duration) -> SysadminResult<()> {
+        if self.stream.is_none() {
+            bail!(SysadminErrorKind::SysadminConnectionError(
+                "Command issues before connection was initialized".to_owned()
+            ));
+        }
+
+        self.timeout = timeout;
+
+        if let Some(stream) = self.stream.as_mut() {
+            stream
+                .set_write_timeout(Some(self.timeout.clone()))
+                .context("Error setting write timeout")?;
+            stream
+                .set_read_timeout(Some(self.timeout.clone()))
+                .context("Error setting read timeout")?;
+        }
+
+        Ok(())
+    }
+
+    /// Reset TCP stream timeout to default (10 seconds).
+    pub fn reset_timeout_to_default(&mut self) -> SysadminResult<()> {
+        self.set_timeout(Duration::from_secs(DEFAULT_COMMAND_TIMEOUT))
     }
 
     /// Makes the Command which will wrap the payload (e.g. Set or Commit)
@@ -153,7 +182,7 @@ impl SysadminClient {
 
 impl Default for SysadminClient {
     fn default() -> SysadminClient {
-        SysadminClient::new(Duration::from_secs(10_u64), 1_u32, 1_u32)
+        SysadminClient::new(Duration::from_secs(DEFAULT_COMMAND_TIMEOUT), 1_u32, 1_u32)
     }
 }
 
