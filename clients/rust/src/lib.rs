@@ -59,9 +59,9 @@ pub struct SysadminClient {
 impl SysadminClient {
     pub fn new(timeout: Duration, xid: u32, id: u32) -> SysadminClient {
         SysadminClient {
-            timeout: timeout,
-            xid: xid,
-            id: id,
+            timeout,
+            xid,
+            id,
             stream: None
         }
     }
@@ -73,10 +73,10 @@ impl SysadminClient {
     pub fn connect<A: ToSocketAddrs>(&mut self, address: A) -> SysadminResult<()> {
         let stream = TcpStream::connect(address).context("failed to connect to sysadmin")?;
         stream
-            .set_write_timeout(Some(self.timeout.clone()))
+            .set_write_timeout(Some(self.timeout))
             .context("error setting write timeout")?;
         stream
-            .set_read_timeout(Some(self.timeout.clone()))
+            .set_read_timeout(Some(self.timeout))
             .context("error setting read timeout")?;
         self.stream = Some(stream);
 
@@ -95,10 +95,10 @@ impl SysadminClient {
 
         if let Some(stream) = self.stream.as_mut() {
             stream
-                .set_write_timeout(Some(self.timeout.clone()))
+                .set_write_timeout(Some(self.timeout))
                 .context("Error setting write timeout")?;
             stream
-                .set_read_timeout(Some(self.timeout.clone()))
+                .set_read_timeout(Some(self.timeout))
                 .context("Error setting read timeout")?;
         }
 
@@ -126,7 +126,7 @@ impl SysadminClient {
                 "Command issued before connection was init".to_string(),
             ))
         }
-        assert!(command.is_initialized() == true);
+        assert!(command.is_initialized());
         use std::io::Write;
 
         let size = command.compute_size();
@@ -215,7 +215,7 @@ impl From<sysadminctl::MappedField> for kvs {
         };
         kvs {
             key: m.take_key(),
-            value: value
+            value
         }
     }
 }
@@ -307,7 +307,7 @@ pub struct Commit {
 
 impl Commit {
     pub fn new(config: CommitConfig) -> Commit {
-        Commit { config: config }
+        Commit { config }
     }
 
     fn into_buf(self) -> sysadminctl::Commit {
@@ -711,7 +711,7 @@ impl From<SysadminValue> for sysadminctl::ConfigValue {
 
 impl From<sysadminctl::ConfigValue> for SysadminValue {
     fn from(mut cv: sysadminctl::ConfigValue) -> SysadminValue {
-        let sysadminvalue = match cv {
+        match cv {
             ref mut v if v.has_int32val() => SysadminValue::Int32(v.get_int32val()),
             ref mut v if v.has_strval() => SysadminValue::Strval(v.take_strval()),
             ref mut v if v.has_boolval() => SysadminValue::Bool(v.get_boolval()),
@@ -733,8 +733,7 @@ impl From<sysadminctl::ConfigValue> for SysadminValue {
                 "{} {} {:?}",
                 "Error converting to SysadminValue", "from sysadminctl::ConfigValue:", v
             ))
-        };
-        sysadminvalue
+        }
     }
 }
 
