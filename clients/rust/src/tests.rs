@@ -30,7 +30,6 @@ fn test_bool_list() {
     test_sysadminvalue(vec![true, false, true]);
 }
 
-
 fn test_sysadminvalue<T: Into<SysadminValue>>(variant: T) {
     let sysadminvalue: SysadminValue = variant.into();
     let sv_for_convert = sysadminvalue.clone();
@@ -68,14 +67,13 @@ fn test_set_bool_list() {
     test_set_to_sysadminctl(vec![true, false, true]);
 }
 
-
 fn test_set_to_sysadminctl<T: Into<SysadminValue>>(v: T) {
     use std::clone::Clone;
     let k = String::from("key");
     let sysadminvalue: SysadminValue = v.into();
     let set = Set {
         key: k.clone(),
-        value: SysadminValue::from(sysadminvalue.clone()),
+        value: SysadminValue::from(sysadminvalue.clone())
     };
     let mut buf: sysadminctl::Set = set.into_buf();
     assert_eq!(buf.is_initialized(), true);
@@ -125,7 +123,6 @@ fn test_send_command() {
             .to_string(),
         error_string
     );
-
 }
 
 #[test]
@@ -161,7 +158,19 @@ macro_rules! test_into_buf {
     };
 }
 test_into_buf!(test_no_arg_into_buf_drop, sysadminctl::Drop, Drop);
-test_into_buf!(test_no_arg_into_buf_firehooks, sysadminctl::FireHooks, FireHooks);
+test_into_buf!(
+    test_no_arg_into_buf_firehooks,
+    sysadminctl::FireHooks,
+    FireHooks
+);
 test_into_buf!(test_no_arg_into_buf_reset, sysadminctl::Reset, Reset);
-test_into_buf!(test_no_arg_into_buf_dumphooks, sysadminctl::DumpHooks, DumpHooks);
-test_into_buf!(test_no_arg_into_buf_inflight, sysadminctl::InFlight, InFlight);
+test_into_buf!(
+    test_no_arg_into_buf_dumphooks,
+    sysadminctl::DumpHooks,
+    DumpHooks
+);
+test_into_buf!(
+    test_no_arg_into_buf_inflight,
+    sysadminctl::InFlight,
+    InFlight
+);
