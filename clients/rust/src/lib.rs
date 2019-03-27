@@ -87,7 +87,7 @@ impl SysadminClient {
     pub fn set_timeout(&mut self, timeout: Duration) -> SysadminResult<()> {
         if self.stream.is_none() {
             bail!(SysadminErrorKind::SysadminConnectionError(
-                "Command issues before connection was initialized".to_owned()
+                "Command issued before connection was initialized".to_owned()
             ));
         }
 
