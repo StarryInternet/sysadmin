@@ -143,6 +143,17 @@ impl SysadminClient {
         stream.write_all(&bytes)?;
         stream.flush()?;
 
+        // XXX(KCS): TcpStream doesn't have a good way of checking for timeouts.
+        // Attempt to peek at response data. If there's an error, command may have timed out.
+        let mut buf = [0; 10];
+        match stream.peek(&mut buf) {
+            Err(e) => bail!(SysadminErrorKind::SysadminConnectionError(format!(
+                "Unable to read response, command may have timed out: {}",
+                e
+            ))),
+            _ => ()
+        };
+
         // receive response
         let mut cis = protobuf::CodedInputStream::new(&mut stream);
         let resp_size = cis
