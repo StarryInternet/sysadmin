@@ -45,7 +45,7 @@ def main():
     sysadmin = None
     if args.config_file:
         with open(args.config_file) as f:
-            config = yaml.load(f)
+            config = yaml.safe_load(f)
             dest = config["storage-path"]
             shutil.rmtree(dest)
         sysadmin = SysAdminRunner()
@@ -53,7 +53,7 @@ def main():
 
     try:
         with open(args.factory_settings) as f:
-            config = yaml.load(f)
+            config = yaml.safe_load(f)
         client = SysAdminClient('localhost', 4000)
         migrator = SysAdminMigrator(client)
         migrator.migrate(config, sysadminctl_pb2.TEMPLATE_ONLY)

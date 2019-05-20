@@ -72,8 +72,8 @@ setup(
         'MarkupSafe>=0.23,<2.0',
         'protobuf>=3.0,<4.0',
         'pytz>=2016.1',
-        'PyYAML>=3.11,<4.0',
-        'six>=1.9,<2.0',
+        'PyYAML>=5.1,<6.0',
+        'six>=1.9,<2.0'
     ],
     extras_require={
         'test': [
