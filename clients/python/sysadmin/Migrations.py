@@ -17,10 +17,10 @@ def load_migrations(path):
         migration_paths = glob.glob("%s/*" % path)
         for fp in sorted(migration_paths):
             with open(fp) as f:
-                migrations.append((fp, yaml.load(f)))
+                migrations.append((fp, yaml.safe_load(f)))
     elif os.path.isfile(path):
         with open(path) as f:
-            migrations.append((path, yaml.load(f)))
+            migrations.append((path, yaml.safe_load(f)))
     else:
         raise ValueError('Given migrations path (%s) is neither a directory '
                             'or a file.' % path)
@@ -37,7 +37,7 @@ class MigrationLog(object):
 
     def load(self, path):
         with open(path) as f:
-            self.migrations = yaml.load(f)
+            self.migrations = yaml.safe_load(f)
             if not self.migrations:
                 self.migrations = {}
 
