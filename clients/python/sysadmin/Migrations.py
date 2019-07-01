@@ -28,7 +28,7 @@ def load_migrations(path):
 
 
 def hash_migration(migration):
-    return hashlib.md5(yaml.dump(migration)).hexdigest()
+    return hashlib.md5(yaml.dump(migration, default_flow_style=None)).hexdigest()
 
 
 class MigrationLog(object):
@@ -53,7 +53,7 @@ class MigrationLog(object):
 
     def save(self, path):
         with open(path, "w") as f:
-            f.write(yaml.dump(self.migrations))
+            f.write(yaml.dump(self.migrations, default_flow_style=None))
 
 
 def nested_setter(sysadmin, config, op):
