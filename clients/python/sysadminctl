@@ -89,8 +89,12 @@ def format_kvs(kvs, verbose=False):
         if kv.value:
             key_type = kv.value.WhichOneof("value").replace("val", "")
             value = UnpackFromProto(kv.value)
-            if isinstance(value, str) or isinstance(value, unicode):
-                value = "\"%s\"" % value
+            if sys.version_info[0] == 2:
+                if isinstance(value, str) or isinstance(value, unicode):
+                    value = "\"%s\"" % value
+            else:
+                if isinstance(value, bytes) or isinstance(value, str):
+                    value = "\"%s\"" % value
 
             output_str = (
                 "%s = %s, type = %s" % (kv.key, value, key_type)
