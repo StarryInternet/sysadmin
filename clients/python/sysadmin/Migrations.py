@@ -28,7 +28,7 @@ def load_migrations(path):
 
 
 def hash_migration(migration):
-    return hashlib.md5(yaml.dump(migration, default_flow_style=None)).hexdigest()
+    return hashlib.md5(yaml.dump(migration, default_flow_style=None).encode('utf-8')).hexdigest()
 
 
 class MigrationLog(object):
