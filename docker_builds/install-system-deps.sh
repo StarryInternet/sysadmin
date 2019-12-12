@@ -1,0 +1,138 @@
+#!/usr/bin/env bash
+set -ex
+
+dnf upgrade --refresh -y
+
+SYSTEM_DEPENDENCIES=(
+    autoconf
+    automake
+    bash
+    bc
+    binutils
+    bison
+    boost
+    boost-atomic
+    boost-chrono
+    boost-container
+    boost-context
+    boost-coroutine
+    boost-date-time
+    boost-devel
+    boost-fiber
+    boost-filesystem
+    boost-graph
+    boost-iostreams
+    boost-locale
+    boost-log
+    boost-math
+    boost-numpy2
+    boost-program-options
+    boost-python2
+    boost-python3
+    boost-random
+    boost-regex
+    boost-serialization
+    boost-system
+    boost-test
+    boost-thread
+    boost-timer
+    boost-type_erasure
+    boost-wave
+    byacc
+    bzip2
+    bzip2-devel
+    clang
+    clang-analyzer
+    clang-tools-extra
+    cmake
+    cpio
+    cpp.x86_64
+    cvs
+    double-conversion-devel
+    doxygen
+    dtc
+    expect
+    file
+    flex
+    fmt-devel
+    gcc-c++.x86_64
+    gcc.x86_64
+    gcovr
+    gdb
+    gettext
+    gflags-devel
+    git
+    glog-devel
+    gnupg
+    gnupg1
+    golang
+    golang-github-protobuf
+    graphviz
+    gzip
+    htop
+    libatomic.i686
+    libatomic.x86_64
+    libevent-devel
+    libffi-devel
+    libgcc.i686
+    libgcc.x86_64
+    libstdc++.i686
+    libstdc++.x86_64
+    libtirpc
+    libtirpc-devel
+    libtool
+    libtool-ltdl-devel
+    libuv-devel
+    log4cxx-devel
+    make
+    mercurial
+    mtd-utils
+    mtd-utils-ubi
+    ncurses-devel
+    ninja-build
+    nmap-ncat
+    nss-pem
+    openssh-server
+    openssl
+    openssl-devel
+    patch
+    perl
+    perl-ExtUtils-MakeMaker
+    perl-Thread-Queue
+    perl-threads
+    procps-ng
+    python2
+    python2-devel
+    python2-pip
+    python3-devel
+    python36
+    python37
+    python3-matplotlib
+    python3-pip
+    python3-virtualenv
+    redhat-rpm-config
+    rsync
+    sed
+    ShellCheck
+    sqlite-devel
+    subversion
+    sudo
+    systemd-devel
+    tar
+    texinfo
+    tmux
+    unzip
+    valgrind
+    vim
+    wget
+    which
+    yaml-cpp-devel
+)
+
+dnf install --allowerasing -y "${SYSTEM_DEPENDENCIES[@]}"
+
+# Don't autoremove if this isn't in a docker container.
+if grep -q docker /proc/1/cgroup; then
+    dnf -y autoremove
+    dnf -y clean all
+fi

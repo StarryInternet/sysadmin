@@ -242,7 +242,7 @@ TransactionManager::Rollback(CommitHistory::CommitId commitId)
                 }
             }
 
-            return mpDb->Commit(TRANSACTION_HISTORY_ID).then([commitId](CommitHistory::CommitId)
+            return mpDb->Commit(TRANSACTION_HISTORY_ID).thenValue([commitId](CommitHistory::CommitId)
             {
                 LOG4CXX_INFO(spLogger, "Completed rollback of commit " << commitId);
                 return folly::makeFuture();

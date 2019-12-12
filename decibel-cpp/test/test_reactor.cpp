@@ -101,7 +101,7 @@ TEST(TestReactor, CallLater)
                         return x;
                     },
                     5))
-        .then([&](int x) {
+        .thenValue([&](int x) {
             ASSERT_TRUE(called_one);
             called_one_with = x;
         });

@@ -55,7 +55,7 @@ public:
         testpb::TestOneof message;                                             \
         message.set_##FIELD(TEST_VALUE);                                       \
         auto fut = mDispatcher.Dispatch(std::move(message), "payload");        \
-        fut.get();                                                             \
+        std::move(fut).get();                                                             \
         ASSERT_MACRO(TEST_VALUE, FIELD##_val);                                 \
     }
 

@@ -73,8 +73,8 @@ void LoopingTask::ScheduledFn()
     // This will call mFn and fulfill a future with the result / thrown
     // exception
     folly::makeFutureWith(this->mFn)
-        .then(std::bind(&LoopingTask::OnCall, this))
-        .onError([this](const std::exception& e) { this->OnError(e); });
+        .thenValue(std::bind(&LoopingTask::OnCall, this))
+        .thenError(folly::tag_t<std::exception>{}, [this](const auto& e) { this->OnError(e); });
 }
 
 void LoopingTask::OnCall()

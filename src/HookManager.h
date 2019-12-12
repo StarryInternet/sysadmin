@@ -28,14 +28,14 @@ folly::Future<folly::Unit> SplitSubprocessesAcrossCores(const T& subprocs,
     auto final_future = folly::makeFuture();
     for (auto& b : coreBuckets)
     {
-        final_future = final_future.then([b]
+        final_future = std::move(final_future).thenValue([b](auto /*unused*/)
         {
             std::vector<folly::Future<folly::Unit>> futures;
             for (auto subproc : b)
             {
                 futures.emplace_back(subproc->ExecuteExternalProcess());
             }
-            return folly::collect(futures).then([]{});
+            return folly::collect(futures).thenValue([](auto /*unused*/){ return folly::Unit(); });
         });
     }
     return final_future;

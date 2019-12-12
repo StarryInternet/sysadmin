@@ -35,19 +35,19 @@ folly::Future<folly::Unit> HookManager::HandleCommit(const ConfigPairList& commi
 
 folly::Future<folly::Unit> HookManager::RunHooks(const HookManager::HookPipeline& hooks)
 {
-    return SplitSubprocessesAcrossCores(hooks.templates, mParallelHooks).then([this, hooks]()
+    return SplitSubprocessesAcrossCores(hooks.templates, mParallelHooks).thenValue([this, hooks](auto /*unused*/)
     {
         LOG4CXX_INFO(spLogger, "Templates rendered and dumped, running services");
         auto final_future = folly::makeFuture();
         for (auto rlPair : hooks.services)
         {
-            final_future = final_future.then([this, rlPair]
+            final_future = std::move(final_future).thenValue([this, rlPair](auto /*unused*/)
             {
-                return SplitSubprocessesAcrossCores(rlPair.second, mParallelHooks).then([]{});
+                return SplitSubprocessesAcrossCores(rlPair.second, mParallelHooks);
             });
         }
         return final_future;
-    }).onError([](const ExternalRunnerError& err)
+    }).thenError(folly::tag_t<ExternalRunnerError>{}, [](const auto& err)
     {
         LOG4CXX_ERROR(spLogger, "Templater failed while running: " << err.what());
         throw err;
@@ -131,7 +131,7 @@ folly::Future<bool> HookManager::TriggerHook(const std::string& name)
             s.emplace(1, std::vector<std::shared_ptr<const HookUser>>());
             s.at(1).emplace_back(hook.get());
         }
-        return RunHooks(HookManager::HookPipeline(t, s)).then([]() {return true; });
+        return RunHooks(HookManager::HookPipeline(t, s)).thenValue([](auto /*unused*/) {return true; });
     }
     else
     {

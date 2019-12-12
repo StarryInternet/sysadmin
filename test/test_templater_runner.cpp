@@ -20,14 +20,16 @@ TEST(TemplaterRunnering, Basic)
     std::vector<std::string> args = {"", ""};
     TemplaterRunner runner(&r, "./argdumper.py", "template", "dest", args);
     int calledback = 0;
-    runner.Run({"key", "key2", "key3"}).then([&r, &calledback]()
+    runner.Run({"key", "key2", "key3"}).thenValue([&r, &calledback](auto /*unused*/)
     {
         calledback++;
         r.Stop();
-    }).onError([](const ExternalRunnerError&)
-    {
-        FAIL() << "Should not have errored out";
-    });
+    }).thenError(
+        folly::tag_t<ExternalRunnerError>{},
+        [](const auto&)
+        {
+            FAIL() << "Should not have errored out";
+        });
     r.Start();
     ASSERT_EQ(1, calledback);
 }
@@ -38,14 +40,16 @@ TEST(TemplaterRunnering, ActualOutput)
     std::vector<std::string> args = {"wl50", "main"};
     TemplaterRunner runner(&r, "./argdumper.py", "template", "dest", args);
     int calledback = 0;
-    runner.Run({"key", "key2", "key3"}).then([&r, &calledback]()
+    runner.Run({"key", "key2", "key3"}).thenValue([&r, &calledback](auto /*unused*/)
     {
         calledback++;
         r.Stop();
-    }).onError([](const ExternalRunnerError& e)
-    {
-        FAIL() << "Should not have errored out: " << e.what();
-    });
+    }).thenError(
+        folly::tag_t<ExternalRunnerError>{},
+        [](const auto& e)
+        {
+            FAIL() << "Should not have errored out: " << e.what();
+        });
     r.Start();
     ASSERT_EQ(1, calledback);
 
@@ -63,14 +67,16 @@ TEST(TemplaterRunnering, FailedOutput)
     // argdumper knows to exit with a bad status when receiving "failme"
     TemplaterRunner runner(&r, "./argdumper.py", "failme", "dest", args);
     int calledback = 0;
-    runner.Run({"key", "key2", "key3"}).then([]()
+    runner.Run({"key", "key2", "key3"}).thenValue([](auto /*unused*/)
     {
         FAIL() << "Should not have succeeded";
-    }).onError([&r, &calledback](const ExternalRunnerError&)
-    {
-        calledback++;
-        r.Stop();
-    });
+    }).thenError(
+        folly::tag_t<ExternalRunnerError>{},
+        [&r, &calledback](const auto&)
+        {
+            calledback++;
+            r.Stop();
+        });
     r.Start();
     ASSERT_EQ(1, calledback);
 }

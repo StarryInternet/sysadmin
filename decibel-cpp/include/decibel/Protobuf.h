@@ -2,6 +2,7 @@
 
 #include <boost/optional.hpp>
 #include <folly/futures/Future.h>
+#include <folly/Unit.h>
 #include <google/protobuf/message.h>
 
 #include <functional>
@@ -26,7 +27,7 @@ template <typename MessageType, typename ReturnType, typename... Args>
 class OneofDispatcher
 {
 public:
-    using ReturnTypeImpl = typename folly::Unit::Lift<ReturnType>::type;
+    using ReturnTypeImpl = typename folly::lift_unit_t<ReturnType>;
     using FutureReturnType = typename folly::Future<ReturnTypeImpl>;
 
     typedef std::function<FutureReturnType(const MessageType&, Args...)>

@@ -125,13 +125,13 @@ SysAdminController::CommitHandler(sysadminctl::Command message, size_t clientId)
     sysadminctl::Response output;
     output.set_id(message.id());
     return mpConfigurator->Commit(clientId,
-                                  commit_opt).then([output](CommitHistory::CommitId id) mutable
+                                  commit_opt).thenValue([output](CommitHistory::CommitId id) mutable
     {
         output.set_status(sysadminctl::StatusCode::SUCCESS);
         sysadminctl::CommitResponse* commitOutput = output.mutable_commit();
         commitOutput->set_commit_id(id);
         return boost::make_optional(output);
-    }).onError([output](const CommitError& err) mutable
+    }).thenError(folly::tag_t<CommitError>{}, [output](const auto& err) mutable
     {
         output.set_status(sysadminctl::StatusCode::EXTERNAL_PROCESS_ERROR);
         sysadminctl::CommitResponse* commitOutput = output.mutable_commit();
@@ -161,12 +161,12 @@ SysAdminController::FireHooksHandler(sysadminctl::Command message, size_t)
     LOG4CXX_INFO(spLogger, "Handling fire hooks request...");
     sysadminctl::Response output;
     output.set_id(message.id());
-    return mpHookManager->RunHooks(mpHookManager->GetAllHooks()).then([output]() mutable
+    return mpHookManager->RunHooks(mpHookManager->GetAllHooks()).thenValue([output](auto /*unused*/) mutable
     {
         LOG4CXX_INFO(spLogger, "All hooks completed successfully");
         output.set_status(sysadminctl::StatusCode::SUCCESS);
         return folly::makeFuture(boost::make_optional(output));
-    }).onError([output](const ExternalRunnerError& err) mutable
+    }).thenError(folly::tag_t<ExternalRunnerError>{}, [output](const auto& err) mutable
     {
         LOG4CXX_ERROR(spLogger, "Error while firing all hooks: " << err.what());
         output.set_status(sysadminctl::StatusCode::EXTERNAL_PROCESS_ERROR);
@@ -213,19 +213,19 @@ SysAdminController::RollbackHandler(sysadminctl::Command message, size_t)
     }
     CommitHistory::CommitId id = maybeId.get();
 
-    return mpCommandInterface->Rollback(id).then([output]() mutable
+    return mpCommandInterface->Rollback(id).thenValue([output](auto /*unused*/) mutable
     {
         output.set_status(sysadminctl::StatusCode::SUCCESS);
         return boost::make_optional(output);
-    }).onError([output](const RollbackError& ) mutable
+    }).thenError(folly::tag_t<RollbackError>{}, [output](const auto& ) mutable
     {
         output.set_status(sysadminctl::StatusCode::FAILED_ROLLBACK);
         return boost::make_optional(output);
-    }).onError([output](const ExternalRunnerError& ) mutable
+    }).thenError(folly::tag_t<ExternalRunnerError>{}, [output](const auto& ) mutable
     {
         output.set_status(sysadminctl::StatusCode::EXTERNAL_PROCESS_ERROR);
         return boost::make_optional(output);
-    }).onError([output](const CommitError& ) mutable
+    }).thenError(folly::tag_t<CommitError>{}, [output](const auto& ) mutable
     {
         output.set_status(sysadminctl::StatusCode::EXTERNAL_PROCESS_ERROR);
         return boost::make_optional(output);
@@ -255,13 +255,13 @@ SysAdminController::ResetHandler(sysadminctl::Command message, size_t clientId)
         }
     }
 
-    return mpConfigurator->Commit(clientId).then([output](CommitHistory::CommitId id) mutable
+    return mpConfigurator->Commit(clientId).thenValue([output](CommitHistory::CommitId id) mutable
     {
         output.set_status(sysadminctl::StatusCode::SUCCESS);
         sysadminctl::ResetResponse* resetOutput = output.mutable_reset();
         resetOutput->set_commit_id(id);
         return boost::make_optional(output);
-    }).onError([output](const CommitError& err) mutable
+    }).thenError(folly::tag_t<CommitError>{}, [output](const auto& err) mutable
     {
         output.set_status(sysadminctl::StatusCode::EXTERNAL_PROCESS_ERROR);
         sysadminctl::ResetResponse* resetOutput = output.mutable_reset();
@@ -303,7 +303,7 @@ SysAdminController::TriggerHookHandler(sysadminctl::Command message, size_t clie
     output.set_id(message.id());
     sysadminctl::TriggerHook cmd = message.trigger();
     return mpHookManager->TriggerHook(cmd.hook())
-        .then([output](bool found) mutable {
+        .thenValue([output](bool found) mutable {
             if (found)
             {
                 LOG4CXX_INFO(spLogger, "Hook successfully triggered");
@@ -316,7 +316,7 @@ SysAdminController::TriggerHookHandler(sysadminctl::Command message, size_t clie
             }
             return boost::make_optional(output);
         })
-        .onError([output](const ExternalRunnerError& err) mutable {
+        .thenError(folly::tag_t<ExternalRunnerError>{}, [output](const auto& err) mutable {
             LOG4CXX_ERROR(spLogger, "Caught ExternalRunner exception: " << err.what());
             output.set_status(sysadminctl::StatusCode::EXTERNAL_PROCESS_ERROR);
             return boost::make_optional(output);

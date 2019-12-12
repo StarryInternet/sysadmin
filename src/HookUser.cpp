@@ -54,11 +54,11 @@ HookUser& HookUser::operator=(HookUser source)
 
 folly::Future<folly::Unit> HookUser::ExecuteExternalProcess() const
 {
-    return mHookFulfiller(mHooks).then([this](const std::vector<ConfigPair::Key>& )
+    return mHookFulfiller(mHooks).thenValue([this](const std::vector<ConfigPair::Key>& )
     {
         // We don't pass anything to hooks being run
         return this->mExternalScript->Run({});
-    }).onError([](const HookUserError& err)
+    }).thenError(folly::tag_t<HookUserError>{}, [](const auto& err)
     {
         throw ExternalRunnerError(err.what());
     });
