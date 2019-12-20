@@ -71,8 +71,11 @@ TEST_F(LoopingTaskFixture, FulfillsFutureOnStop)
     auto fut = task.Start(1);
     bool futureCalled = false;
     bool errCalled = false;
-    fut.then([&]() { futureCalled = true; })
-        .onError([&](const std::exception&) { errCalled = true; });
+    std::move(fut)
+        .thenValue([&](auto /*unused*/) { futureCalled = true; })
+        .thenError(
+            folly::tag_t<std::exception>{},
+            [&](const auto&) { errCalled = true; });
     mReactor.CallLater(10, [&]() {
         ASSERT_TRUE(task.Running());
         task.Stop();
@@ -88,8 +91,11 @@ TEST_F(LoopingTaskFixture, FulfillsFutureOnError)
     auto fut = task.Start(1);
     bool futureCalled = false;
     bool errCalled = false;
-    fut.then([&]() { futureCalled = true; })
-        .onError([&](const std::exception&) { errCalled = true; });
+    std::move(fut)
+        .thenValue([&](auto /*unused*/) { futureCalled = true; })
+        .thenError(
+            folly::tag_t<std::exception>{},
+            [&](const auto&) { errCalled = true; });
     mReactor.CallLater(10, [&]() {
         // Task should have stopped running when the error was thrown
         ASSERT_FALSE(task.Running());
@@ -105,12 +111,16 @@ TEST_F(LoopingTaskFixture, StopStart)
     int futureCalled = 0;
     int errCalled = 0;
     task.Start(50)
-        .then([&]() { futureCalled++; })
-        .onError([&](const std::exception&) { errCalled++; });
+        .thenValue([&](auto /*unused*/) { futureCalled++; })
+        .thenError(
+            folly::tag_t<std::exception>{},
+            [&](const auto&) { errCalled++; });
     task.Stop();
     task.Start(50)
-        .then([&]() { futureCalled++; })
-        .onError([&](const std::exception&) { errCalled++; });
+        .thenValue([&](auto /*unused*/) { futureCalled++; })
+        .thenError(
+            folly::tag_t<std::exception>{},
+            [&](const auto&) { errCalled++; });
     task.Stop();
     mReactor.Start();
     ASSERT_EQ(2, futureCalled);
@@ -121,7 +131,8 @@ TEST_F(LoopingTaskFixture, Reschedule)
 {
     LoopingTask task(&mReactor, std::bind(&LoopingTaskFixture::Callback, this));
     bool futureCalled = false;
-    task.Start(5).then([&futureCalled]() { futureCalled = true; });
+    task.Start(5)
+        .thenValue([&futureCalled](auto /*unused*/) { futureCalled = true; });
     task.Reschedule(50);
     mReactor.CallLater(10, [&]() {
         ASSERT_TRUE(task.Running());

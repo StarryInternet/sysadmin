@@ -42,10 +42,10 @@ folly::Future<folly::Unit> ExternalRunner::Run(const IExternalRunner::FormattedV
                                             cmd,
                                             ConvertOptions(mRunOptions)));
     return mSubproc->RunSubprocess()
-        .then([basic_process_str]
+        .thenValue([basic_process_str](auto /*unused*/)
         {
             LOG4CXX_INFO(spLogger, "External process completed: " << basic_process_str);
-        }).onError([options_copy, cmd] (const dn::FutureSubprocessError& err)
+        }).thenError(folly::tag_t<dn::FutureSubprocessError>{}, [options_copy, cmd](const auto& err)
         {
             if (options_copy == HookOptions::RunOptions::IGNORE)
             {

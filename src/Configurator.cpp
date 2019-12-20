@@ -52,12 +52,12 @@ Configurator::Commit(IConfigurator::ClientId clientId,
         if (run_services || config_opt == sysadminctl::CommitConfig::TEMPLATE_ONLY)
         {
             return mServiceHooksCallback(changed,
-                                         run_services).then([this, clientId, commitId]()
+                                         run_services).thenValue([this, clientId, commitId](auto /*unused*/)
             {
                 LOG4CXX_INFO(spLogger, "All commit signals completed successfully. XID: " << clientId);
                 this->Drop(clientId);
                 return commitId;
-            }).onError([this, clientId, commitId](const ExternalRunnerError& err) -> CommitHistory::CommitId
+            }).thenError(folly::tag_t<ExternalRunnerError>{}, [this, clientId, commitId](const auto& err) -> CommitHistory::CommitId
             {
                 LOG4CXX_ERROR(spLogger, "A commit signal failed, Re-attempt the commit: " <<
                               err.what() << ". XID: " << clientId);

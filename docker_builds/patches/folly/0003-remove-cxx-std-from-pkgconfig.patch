@@ -1,0 +1,11 @@
+diff -Naur -x .git folly.orig/CMake/GenPkgConfig.cmake folly/CMake/GenPkgConfig.cmake
+--- folly.orig/CMake/GenPkgConfig.cmake	2019-12-19 16:27:08.041031738 -0500
++++ folly/CMake/GenPkgConfig.cmake	2019-12-19 18:14:00.347863089 -0500
+@@ -92,6 +92,7 @@
+ 
+   # Set the output variables
+   string(REPLACE ";" " " cflags "${cflags}")
++  string(REGEX REPLACE "-std=[0-9a-z+]+ " "" cflags "${cflags}")
+   set("${var_prefix}_CFLAGS" "${cflags}" PARENT_SCOPE)
+   string(REPLACE ";" " " private_libs "${private_libs}")
+   set("${var_prefix}_PRIVATE_LIBS" "${private_libs}" PARENT_SCOPE)

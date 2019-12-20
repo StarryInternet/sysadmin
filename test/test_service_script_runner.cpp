@@ -19,14 +19,16 @@ TEST(ServiceScriptRunnering, Basic)
     dm::Reactor r;
     ServiceScriptRunner runner(&r, {"./argdumper.py"});
     int calledback = 0;
-    runner.Run({"key", "key2", "key3"}).then([&r, &calledback]()
+    runner.Run({"key", "key2", "key3"}).thenValue([&r, &calledback](auto /*unused*/)
     {
         calledback++;
         r.Stop();
-    }).onError([](const ExternalRunnerError&)
-    {
-        FAIL() << "Should not have errored out";
-    });
+    }).thenError(
+        folly::tag_t<ExternalRunnerError>{},
+        [](const auto&)
+        {
+            FAIL() << "Should not have errored out";
+        });
     r.Start();
     ASSERT_EQ(1, calledback);
 }
@@ -36,14 +38,16 @@ TEST(ServiceScriptRunnering, ActualOutput)
     dm::Reactor r;
     ServiceScriptRunner runner(&r, {"./argdumper.py"});
     int calledback = 0;
-    runner.Run({"key", "key2", "key3"}).then([&r, &calledback]()
+    runner.Run({"key", "key2", "key3"}).thenValue([&r, &calledback](auto /*unused*/)
     {
         calledback++;
         r.Stop();
-    }).onError([](const ExternalRunnerError&)
-    {
-        FAIL() << "Should not have errored out";
-    });
+    }).thenError(
+        folly::tag_t<ExternalRunnerError>{},
+        [](const auto&)
+        {
+            FAIL() << "Should not have errored out";
+        });
     r.Start();
     ASSERT_EQ(1, calledback);
 
@@ -58,14 +62,16 @@ TEST(ServiceScriptRunnering, WithServiceArgs)
     dm::Reactor r;
     ServiceScriptRunner runner(&r, {"./argdumper.py", "key0", "more", "args"});
     int calledback = 0;
-    runner.Run({}).then([&r, &calledback]()
+    runner.Run({}).thenValue([&r, &calledback](auto /*unused*/)
     {
         calledback++;
         r.Stop();
-    }).onError([](const ExternalRunnerError&)
-    {
-        FAIL() << "Should not have errored out";
-    });
+    }).thenError(
+        folly::tag_t<ExternalRunnerError>{},
+        [](const auto&)
+        {
+            FAIL() << "Should not have errored out";
+        });
     r.Start();
     ASSERT_EQ(1, calledback);
 
@@ -81,14 +87,16 @@ TEST(ServiceScriptRunnering, FailedOutput)
     ServiceScriptRunner runner(&r, {"./argdumper.py"});
     int calledback = 0;
     // argdumper knows to exit with a bad status when receiving "failme" as it's first argument
-    runner.Run({"failme", "key2", "key3"}).then([]()
+    runner.Run({"failme", "key2", "key3"}).thenValue([](auto /*unused*/)
     {
         FAIL() << "Should have errored out";
-    }).onError([&r, &calledback](const ExternalRunnerError&)
-    {
-        calledback++;
-        r.Stop();
-    });
+    }).thenError(
+        folly::tag_t<ExternalRunnerError>{},
+        [&r, &calledback](const auto&)
+        {
+            calledback++;
+            r.Stop();
+        });
     r.Start();
     ASSERT_EQ(1, calledback);
 }
@@ -98,14 +106,16 @@ TEST(ServiceScriptRunnering, Detaching)
     dm::Reactor r;
     ServiceScriptRunner runner(&r, {"./argdumper.py"}, HookOptions::RunOptions::DETACH);
     int calledback = 0;
-    runner.Run({"key", "key2", "key3"}).then([&r, &calledback]()
+    runner.Run({"key", "key2", "key3"}).thenValue([&r, &calledback](auto /*unused*/)
     {
         calledback++;
         r.Stop();
-    }).onError([](const ExternalRunnerError&)
-    {
-        FAIL() << "Should not have errored out";
-    });
+    }).thenError(
+        folly::tag_t<ExternalRunnerError>{},
+        [](const auto&)
+        {
+            FAIL() << "Should not have errored out";
+        });
     r.Start();
     ASSERT_EQ(1, calledback);
 }
@@ -115,14 +125,16 @@ TEST(ServiceScriptRunnering, Ignoring)
     dm::Reactor r;
     ServiceScriptRunner runner(&r, {"./argdumper.py"}, HookOptions::RunOptions::IGNORE);
     int calledback = 0;
-    runner.Run({"failme", "key2", "key3"}).then([&r, &calledback]()
+    runner.Run({"failme", "key2", "key3"}).thenValue([&r, &calledback](auto /*unused*/)
     {
         calledback++;
         r.Stop();
-    }).onError([](const ExternalRunnerError&)
-    {
-        FAIL() << "Should not have errored out";
-    });
+    }).thenError(
+        folly::tag_t<ExternalRunnerError>{},
+        [](const auto&)
+        {
+            FAIL() << "Should not have errored out";
+        });
     r.Start();
     ASSERT_EQ(1, calledback);
 }

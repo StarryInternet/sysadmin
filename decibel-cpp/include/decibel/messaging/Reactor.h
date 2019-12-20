@@ -10,7 +10,7 @@
 
 #include <folly/Executor.h>
 #include <folly/futures/Future.h>
-#include <folly/futures/Timekeeper.h>
+#include <folly/Unit.h>
 #include <folly/MoveWrapper.h>
 
 #include <unordered_set>
@@ -50,7 +50,7 @@ public:
     niceuv::EventLoop* GetEventLoop();
 
     template <typename F,
-              typename Result = typename folly::Unit::Lift<ResultOf<F>>::type>
+              typename Result = typename folly::lift_unit_t<ResultOf<F>>>
     folly::Future<Result> CallLater(ssize_t timeout, F&& fn)
     {
         auto pPromise = std::make_shared<folly::Promise<Result>>();
@@ -75,7 +75,7 @@ public:
     // virtual void add(folly::Func fn);
 
     // folly::TimeKeeper
-    virtual folly::Future<folly::Unit> after(folly::Duration duration);
+    virtual folly::SemiFuture<folly::Unit> after(folly::Duration duration);
 
     niceuv::ITimer* GetTimer();
 

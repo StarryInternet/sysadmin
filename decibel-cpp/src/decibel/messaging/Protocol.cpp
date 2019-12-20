@@ -54,13 +54,13 @@ void Protocol::InternalConnectionLost(int status)
 
 void Protocol::Reconnect(int status)
 {
-    mOnConnectionLostCallback(status).then([this](bool reconnect) {
+    mOnConnectionLostCallback(status).thenValue([this](bool reconnect) {
         if (reconnect)
         {
             LOG4CXX_INFO(spLogger, "Reconnecting...");
-            mpTransport->Reconnect().then([this]() {
+            mpTransport->Reconnect().thenValue([this](auto /*unused*/) {
                 LOG4CXX_INFO(spLogger, "Successfully reconnected");
-                MakeConnection(std::move(mpTransport));
+                this->MakeConnection(std::move(mpTransport));
             });
         }
         else

@@ -64,7 +64,7 @@ folly::Future<SubprocessHandler::Buffer> FutureSubprocess::RunSubprocess()
     folly::collectAll(pStdOutPromise->getFuture(),
                       pExitPromise->getFuture(),
                       pStdErrPromise->getFuture())
-        .then([pWrappedPromise](
+        .thenValue([pWrappedPromise](
             const std::tuple<folly::Try<SubprocessHandler::Buffer>,
                              folly::Try<int>,
                              folly::Try<SubprocessHandler::Buffer>>& t) {

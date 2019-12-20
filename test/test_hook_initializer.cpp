@@ -86,13 +86,15 @@ TEST_F(HookInitFixture, HookFulfilling)
 
     hooks.emplace("wontfulfill");
     int calledback = 0;
-    FulfillHooks(&mMockStorage, hooks).then([](const std::vector<ConfigPair::Key>&)
+    FulfillHooks(&mMockStorage, hooks).thenValue([](const std::vector<ConfigPair::Key>&)
                                             {
                                                 FAIL() << "Should not have succeeded";
-                                            }).onError([&calledback](const HookUserError&)
-                                            {
-                                                calledback++;
-                                            });
+                                            }).thenError(
+                                                folly::tag_t<HookUserError>{},
+                                                [&calledback](const auto&)
+                                                {
+                                                    calledback++;
+                                                });
     ASSERT_EQ(1, calledback);
 }
 

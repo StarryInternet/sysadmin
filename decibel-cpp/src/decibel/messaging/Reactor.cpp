@@ -60,7 +60,7 @@ folly::Future<folly::Unit> Reactor::ConnectTcp(const std::string& host,
     auto pResolved = std::make_shared<folly::Promise<std::string>>();
     if (!folly::IPAddress::validate(host))
     {
-        mEventLoop.ResolveHostname(host).then(
+        mEventLoop.ResolveHostname(host).thenValue(
             [pResolved](const std::vector<std::string>& addrs)
             {
                 if (addrs.size() > 0)
@@ -72,8 +72,9 @@ folly::Future<folly::Unit> Reactor::ConnectTcp(const std::string& host,
                     pResolved->setException(std::runtime_error("Couldn't resolve hostname"));
                 }
             }
-        ).onError(
-            [pResolved](const DnsResolutionError& err)
+        ).thenError(
+            folly::tag_t<DnsResolutionError>{},
+            [pResolved](const auto& err)
             {
                 pResolved->setException(err);
             }
@@ -107,19 +108,21 @@ folly::Future<folly::Unit> Reactor::ConnectTcp(const std::string& host,
 
     folly::MoveWrapper<TcpConnPtr> tcpConnWrapped(std::move(pTcpConn));
 
-    return pResolved->getFuture().then(
+    return pResolved->getFuture().thenValue(
         [rawpProtocol, port, pConnectPromise, rawTcpConn, tcpConnWrapped]
         (const std::string& ipaddr) mutable
         {
             rawTcpConn->Connect(ipaddr, port);
             rawTcpConn->Start();
             return pConnectPromise->getFuture()
-                .onError([rawTcpConn](const std::runtime_error& err)
+                .thenError(
+                folly::tag_t<std::runtime_error>{},
+                [rawTcpConn](const auto& err)
                 {
                     rawTcpConn->ClearCallbacks();
                     throw err;
                 })
-                .then([rawpProtocol, tcpConnWrapped, ipaddr, port]() mutable
+                .thenValue([rawpProtocol, tcpConnWrapped, ipaddr, port](auto /*unused*/) mutable
                 {
                     std::unique_ptr<TcpTransport> pTransport(
                         new TcpTransport(tcpConnWrapped.move(), ipaddr, port));
@@ -159,11 +162,11 @@ void Reactor::CancelCall(std::shared_ptr<OneShotTimerEvent> pTimer)
 //     CallSoon(fn);
 // }
 
-folly::Future<folly::Unit> Reactor::after(folly::Duration duration)
+folly::SemiFuture<folly::Unit> Reactor::after(folly::Duration duration)
 {
     auto pPromise = std::make_shared<folly::Promise<folly::Unit>>();
     CallLater(duration.count(), [pPromise] { pPromise->setValue(); });
-    return pPromise->getFuture();
+    return pPromise->getFuture().semi();
 }
 
 void Reactor::Shutdown()
@@ -173,7 +176,7 @@ void Reactor::Shutdown()
     {
         futures.push_back(client->Shutdown());
     }
-    folly::collectAll(futures).then([this] { Stop(); });
+    folly::collectAll(futures).thenValue([this](auto /*unused*/) { this->Stop(); });
     Start();
 }
 

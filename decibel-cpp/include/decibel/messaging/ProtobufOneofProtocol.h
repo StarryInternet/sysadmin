@@ -54,7 +54,7 @@ public:
         auto ret = mDispatcher.Dispatch(
             std::move(protobufMessage), "payload", this->mId);
         auto valid_ptr = mValidThis;
-        ret.then([this, valid_ptr](boost::optional<ReturnType> maybeMessage) {
+        std::move(ret).thenValue([this, valid_ptr](boost::optional<ReturnType> maybeMessage) {
             if (maybeMessage && *valid_ptr)
             {
                 try
@@ -69,6 +69,8 @@ public:
                     }
                 }
             }
+
+            return folly::Unit();
         });
     }
 

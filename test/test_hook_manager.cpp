@@ -178,13 +178,15 @@ TEST_F(HookManagerFixture, RealService)
     HookManager manager(std::move(mpTable), 100);
     auto committed = ConfigPairList({ConfigPair("hook1", ConfigType<std::string>("value"))});
     int calledback = 0;
-    manager.HandleCommit(committed).then([]()
+    manager.HandleCommit(committed).thenValue([](auto /*unused*/)
     {
         FAIL() << "Should not have succeeded";
-    }).onError([&calledback](const ExternalRunnerError&)
-    {
-        calledback++;
-    });
+    }).thenError(
+        folly::tag_t<ExternalRunnerError>{},
+        [&calledback](const auto&)
+        {
+            calledback++;
+        });
     r.Start();
     ASSERT_EQ(1, calledback);
 }

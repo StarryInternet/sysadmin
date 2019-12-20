@@ -318,7 +318,7 @@ TEST_F(SubprocessFixture, TestFutureSubprocessHandler)
     FutureSubprocess subproc(&mEventLoop, {"echo", "cheesy future"});
     int called = 0;
     subproc.RunSubprocess()
-        .then([&](SubprocessHandler::Buffer buffer) {
+        .thenValue([&](SubprocessHandler::Buffer buffer) {
             REQUIRE_EQUAL_VECTORS(std::vector<char>({'c',
                                                      'h',
                                                      'e',
@@ -337,9 +337,11 @@ TEST_F(SubprocessFixture, TestFutureSubprocessHandler)
             mEventLoop.Stop();
             called++;
         })
-        .onError([](const FutureSubprocessError&) {
-            FAIL() << "Should not have errored out";
-        });
+        .thenError(
+            folly::tag_t<FutureSubprocessError>{},
+            [](const auto&) {
+                FAIL() << "Should not have errored out";
+            });
     mEventLoop.RunForever();
     ASSERT_EQ(1, called);
 }
@@ -348,14 +350,16 @@ TEST_F(SubprocessFixture, TestFutureSubprocessHandlerFailure)
 {
     FutureSubprocess subproc(&mEventLoop, {"ls", "/does/not/exist"});
     subproc.RunSubprocess()
-        .then([&](SubprocessHandler::Buffer) {
+        .thenValue([&](SubprocessHandler::Buffer) {
             FAIL() << "Should not have received any data";
             mEventLoop.Stop();
         })
-        .onError([&](const FutureSubprocessError& err) {
-            LOG4CXX_ERROR(spLogger, "Subprocess error: " << err.what());
-            mEventLoop.Stop();
-        });
+        .thenError(
+            folly::tag_t<FutureSubprocessError>{},
+            [&](const auto& err) {
+                LOG4CXX_ERROR(spLogger, "Subprocess error: " << err.what());
+                mEventLoop.Stop();
+            });
     mEventLoop.RunForever();
 }
 
@@ -371,12 +375,14 @@ TEST_F(SubprocessFixture, TestFutureConstructionDeletion)
 {
     FutureSubprocess subproc(&mEventLoop, {"echo", "waffle future"});
     subproc.RunSubprocess()
-        .then([&](SubprocessHandler::Buffer) {
+        .thenValue([&](SubprocessHandler::Buffer) {
             FAIL() << "Loop never runs so this is impossible";
         })
-        .onError([](const FutureSubprocessError&) {
-            FAIL() << "Should not have errored out";
-        });
+        .thenError(
+            folly::tag_t<FutureSubprocessError>{},
+            [](const auto&) {
+                FAIL() << "Should not have errored out";
+            });
 }
 
 TEST_F(PollerFixture, TestPollerRead)
@@ -657,14 +663,14 @@ TEST_F(EventLoopFixture, TestEventLoopAsExecutor)
     });
 
     p.getFuture()
-        .then([&](int value) {
+        .thenValue([&](int value) {
             EXPECT_EQ(pthread_id.load(), std::this_thread::get_id());
             EXPECT_EQ(value, 1);
             counter.fetch_add(1);
             return value;
         })
         .via(&mEventLoop)
-        .then([&](int value) {
+        .thenValue([&](int value) {
             EXPECT_EQ(main_thread_id, std::this_thread::get_id());
             EXPECT_EQ(value, 1);
             counter.fetch_add(1);
@@ -682,7 +688,7 @@ TEST_F(EventLoopFixture, TestEventLoopAsExecutor)
 TEST_F(EventLoopFixture, DnsResolutionSuccess)
 {
     // My website is a static IP as of writing this...
-    mEventLoop.ResolveHostname("ericbrown23.com").then(
+    mEventLoop.ResolveHostname("ericbrown23.com").thenValue(
         [&](const std::vector<std::string>& addrs)
         {
             REQUIRE_EQUAL_VECTORS(std::vector<std::string>({"107.170.77.44"}),
@@ -694,7 +700,7 @@ TEST_F(EventLoopFixture, DnsResolutionSuccess)
 
 TEST_F(EventLoopFixture, DnsResolutionMultipleAnswers)
 {
-    mEventLoop.ResolveHostname("google.com").then(
+    mEventLoop.ResolveHostname("google.com").thenValue(
         [&](const std::vector<std::string>& addrs)
         {
             ASSERT_LE(1, addrs.size());
@@ -705,17 +711,18 @@ TEST_F(EventLoopFixture, DnsResolutionMultipleAnswers)
 
 TEST_F(EventLoopFixture, DnsFailure)
 {
-    mEventLoop.ResolveHostname("google.nottld").then(
+    mEventLoop.ResolveHostname("google.nottld").thenValue(
         [&](const std::vector<std::string>& addrs)
         {
             LOG4CXX_ERROR(spLogger, "Should not be called");
             mEventLoop.Stop();
             FAIL();
-        }).onError(
-        [&](const DnsResolutionError& err)
-        {
-            mEventLoop.Stop();
-        });
+        }).thenError(
+            folly::tag_t<DnsResolutionError>{},
+            [&](const auto& err)
+            {
+                mEventLoop.Stop();
+            });
     mEventLoop.RunForever();
 }
 
@@ -724,45 +731,47 @@ TEST_F(EventLoopFixture, DnsTimeout)
     mEventLoop.ResolveHostname(
         "google.nottld",
         std::chrono::milliseconds(0)
-    ).then(
+    ).thenValue(
         [&](const std::vector<std::string>& addrs)
         {
             LOG4CXX_ERROR(spLogger, "Should not be called");
             mEventLoop.Stop();
             FAIL();
-        }).onError(
-        [&](const DnsResolutionError& err)
-        {
-            mEventLoop.Stop();
-        }
-    );
+        }).thenError(
+            folly::tag_t<DnsResolutionError>{},
+            [&](const auto& err)
+            {
+                mEventLoop.Stop();
+            });
     mEventLoop.RunForever();
 }
 
 TEST_F(EventLoopFixture, DnsMultipleRequests)
 {
-    mEventLoop.ResolveHostname("google.com").then(
+    mEventLoop.ResolveHostname("google.com").thenValue(
         [&](const std::vector<std::string>& addrs)
         {
             ASSERT_LE(1, addrs.size());
-        }).onError(
-        [&](const DnsResolutionError& err)
-        {
-            mEventLoop.Stop();
-            FAIL();
-        });
+        }).thenError(
+            folly::tag_t<DnsResolutionError>{},
+            [&](const auto& err)
+            {
+                mEventLoop.Stop();
+                FAIL();
+            });
 
-    mEventLoop.ResolveHostname("ericbrown23.com").then(
+    mEventLoop.ResolveHostname("ericbrown23.com").thenValue(
         [&](const std::vector<std::string>& addrs)
         {
             REQUIRE_EQUAL_VECTORS(std::vector<std::string>({"107.170.77.44"}),
                                   addrs);
-        }).onError(
-        [&](const DnsResolutionError& err)
-        {
-            mEventLoop.Stop();
-            FAIL();
-        });
+        }).thenError(
+            folly::tag_t<DnsResolutionError>{},
+            [&](const auto& err)
+            {
+                mEventLoop.Stop();
+                FAIL();
+            });
 
     mEventLoop.RunForever();
 }
