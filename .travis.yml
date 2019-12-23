@@ -1,26 +1,23 @@
 sudo: required
-
 env:
   global:
-  - secure: Nk0lL86bdT9HlUzgFGz3XCckTdss0cjZY9mzbNh2XttyMxRws4ar62PNuYHHgM8h4NIuIzdiCC+ulrTVQgqx4ui/2SxkAUgFrSKlYrdfKEIYgTEa/RkRCYrLs40OEqOgxKDhwudi6c3Vx5J3dWBllrFKIU4C3heOJIibVmvQrarZojQc5bAimKFAXl9ZobezD3VtkW+az9lSzYN93ypdo3yAflTPPWfvF/rDVTz2avJsExtPv43f+J1mQj+AiiU4L0qXkHwBV+a+A/ZqHjmreSyUmShFXX7bn9qcdb6SKQBbS/i/qGahUVrbJ4lPkpjAHEmZ8fi6yz8nj3GoahcA9sQ6NgpLtSPhy47GLeDwdMoOTq/lrwKPPAwPTUjrGeM/VfKBFiWa12J30EMH5Nv2EzpNlY3bEodRIQSiN02G6xzfyK7XDyg4nUMraIPwCs3lAv4wEl3LIImMkyOnQexE0oFkCEAOMHde0VszTUphPnNDLMY6VaMls1JVzTTgWO8e1GGQVB4lISPDLehTMLnJZE43zrHrhEf7oA3O6YtRezpuB+7wJ3YfNsPQh5FQ7GMAhAufH5ss/Ql05D8WfCjUmaFkbagixcUozaNKfct6MFgWRUw5fdXAd37A6DoCeRXoO9vH7nTDm443aG2uZYavdGGjNCPTnq2atOjHj6itRbc=
-  - secure: CrKt1gN2mcR8quetGs6CWSVSNPQoG0irsGztYhkGZusjC9blZzPyLndNwfyVDqt3m0dSQYow9p++Z1au08EhB29yYPb93j6KDCVNK+A0wWKY1gExA9En6sp1k9WyzHFSCs/Xq42vT4tNjTZinw+Qk1Wwc/bqeL1zpbQ8KmjsMPrdGqJZiuRlH9KNAHUuAFXR+yffokEMb43yD+wGfKfN0DAe4Z9O3KgWsoCg8FLiPDDjuf56/RjQH6vc2Jfn/8TjNY1h7ZIiWMwLrxqvKedt9bSRiafApgSCR+IWJzmo9ZsDHyV0R+wxKhZRHTF4kfAejDOKopMeOqaybbw/HywpOVc8z7AHMfRxKMt3Oiz6CP3CDq/VZoK9uQvn6m/+tnQ1XvEWwh3Z+g0GnKFJhMB03AlBJu1ngv5wPLzzfX81Mt02DLMOhlzeKWBRvohgovF74u3mGCn6uS+NG0bw8wqKImLuqqeQCJjSHNUXASZwLFv95LURhZu3GkRquupqiJ4cR2SESukPiBdhI4imkSCYuwGpEuv/4NJuBqM5otUHygf6XhUSgnLqqfAOoDdPYRYXt2VPvgbvr2pJ6hMbdTGbsJdFHW4nCU5abQ0yvxqrw8NrgfHYwkvYTeTzr1oDc+P0bggw1TrQUmoFgBtmie8iB0NI8XeOgot5ShlvEfjyuMo=
-
+  - secure: hsX9eueiQusRw+AHMHOow93vUOrh14RzJ0clXw71EQx80N/iFndHJfZj3L+W4tHYiewN4yAVDA3wv6j7IT/GqIGlTpJDrivcTs/IYwvBnD5yKPocBDgndbvmnIDAZeYnMC0Na319SbOudDy4HIWFpfRx0SQycZ8nW1Mla+MyHrXyxMYMDkJ6BF/Hsv/5IFCCVqInWvHg52ILvwzagI5Cyw4jruyRmRjv8xWFgM/fBZk0Qvpa6VY/ZI0u/9V1XPG0EKa5QwhYXtkGxW9dZ/zZHKjj5KHuc5CfoThVwP1QrD6Jqb9IZfIq5bwpMfzYwiq9Sz4xFiqDd6z8zREiHGqx8Z/pzdltdY2qBC5R4aIOpTv0FWcgQFBSvP0TKneYT4opOgaHrTHisD/1n6ztthnymMGepgRVuAKQPC0TUPwoJeoDe/bMNsvQr7EXpu3MNSN+C1ym8e5UZ0VkVg9hEdYO+PGdC8ZrzsDItZOVdDWGHKlUO1fsQIYdojkJUrSq32SlwGNYBQwfwETdWiVA9zB1Y8AGqSHcedtFPdBfSnHDDL9CBRNI8iVdIq4UQbFsrYHp+QyqnW/22j7o+6q+2TZDQ7Vd/xkhmmFvWkAS9sfFODnIXjuOi5EOI/iX1pSon5TalzJOEScgLHYZ4EXSPZjNxodtIQ+yeF6lil9OpFgstU8=
+  - secure: mnivPElhIq3n77KJif1wzycZP58BYcYn/cessxVgkK85yXSjVRor39eAX356QwKgbbzczSQVZNjPmrXmevP+LqNJOzqb/iS09Hzk2NTt9QLWHNwhjkwXe+9kqcs31l1da7wtIbj9TH5BjRzkSPOFLbRc0r/nuX79DEkZdSm14VxNtf6luCQH8Jw2MyC2ZfuVndbVFWOBmON00m6IPgQjdcoo/AnlHo/igp4vIouD3scXYliWlUh1UKT443ZXnGOPMJ1DJsizjZEhex7nj+G/APVuXcv/E/cFYSpzbXIKxVHy6gQXm0j624CTuzWs4Fis834vQyoKziToUHI/iEnxM6nCe5zvkEjjz8lbvGkU5i3xZjmyL54EHRoxVNrA+FpK+sVKBMJvl41EV1XMIe53GcU2bef77POVEd+8RJAG8XLYrCHprJJkNMu0GVqQSjCUzVpC/JGokiksJGdxcaq2MeqwBd5qPqdUvg8K2ktF19+J2sNdIjWaoBpTpHiRtA2uJkPiBDNvKyfTEHu76ISEWNPgp3ax+dEgJtsSQZjs0lIQ68FNIVKVOqCeAhWx7CmfeFCVuj/9MppvRInpRLmhecbvioSoty/dAa6xrAOsi01qPju+I07ACVzkrxL8UGw7TmFm0E/RfWo5Oybyn25sQ/6FxWAdZIQLA0MzEER5eEs=
 services:
 - docker
 before_install:
-- ./docker_control.sh -b
+- "./docker_control.sh -b"
 script:
-- ./docker_control.sh -t
+- "./docker_control.sh -t"
 deploy:
-  - provider: script
-    script: docker_builds/image_deploy.sh latest $DOCKER_USERNAME $DOCKER_PASSWORD
-    on:
-      branch: master
-  - provider: script
-    script: docker_builds/image_deploy.sh $TRAVIS_TAG $DOCKER_USERNAME $DOCKER_PASSWORD
-    on:
-      tags: true
-      all_branches: true
-
+- provider: script
+  script: docker_builds/image_deploy.sh latest $DOCKER_USERNAME $DOCKER_PASSWORD
+  on:
+    branch: master
+- provider: script
+  script: docker_builds/image_deploy.sh $TRAVIS_TAG $DOCKER_USERNAME $DOCKER_PASSWORD
+  on:
+    tags: true
+    all_branches: true
 before_cache:
-  - docker logout
+- docker logout
