@@ -76,6 +76,7 @@ class SysAdminMigrator(object):
         self.new_keys(config.get("new", {}))
         self.remove_keys(config.get("remove", {}))
         self.change_types(config.get("typechange", {}))
+        self.change_values_if_exists("valuechange_if_exists", {}))
         self.change_values(config.get("valuechange", {}))
         self.rename_keys(config.get("rename", {}))
         return self.sysadmin.commit(commit_mode)
@@ -85,6 +86,9 @@ class SysAdminMigrator(object):
 
     def new_keys(self, keys):
         nested_setter(self.sysadmin, keys, maybe_add_key)
+
+    def change_values_if_exists(self, keys):
+        nested_setter(self.sysadmin, keys, change_value_if_exists)
 
     def change_values(self, keys):
         nested_setter(self.sysadmin, keys, change_value)
@@ -133,6 +137,17 @@ def change_value(sysadmin, key, value):
         sysadmin.set(key, truevalue, head_type)
     else:
         sysadmin.set(key, value)
+
+
+def change_value_if_exists(sysadmin, key, value):
+    ''' Similar to change_value(), but if key does not exist, it will
+    not create one.
+    '''
+    existing = sysadmin.get(key)
+    if existing.status == sysadminctl_pb2.KEY_NOT_FOUND:
+        print("Key {} must exist to have it's value changed".format(key))
+        return
+    change_value(sysadmin, key, value)
 
 
 def change_type(sysadmin, key, newtype):
