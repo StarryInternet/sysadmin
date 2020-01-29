@@ -1,6 +1,6 @@
 [Unit]
 Description=Sysadmin
-After=network.target syslog.target
+After=network-pre.target syslog.target
 
 [Service]
 ExecStart=/bin/sysadmin /etc/sysadmin/config.yaml
