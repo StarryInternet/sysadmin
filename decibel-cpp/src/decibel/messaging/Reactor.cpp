@@ -1,3 +1,4 @@
+// Copyright 2017, 2020. Starry, Inc. All Rights Reserved.
 #include "decibel/messaging/Reactor.h"
 
 #include "decibel/messaging/Exchanges.h"
@@ -162,7 +163,7 @@ void Reactor::CancelCall(std::shared_ptr<OneShotTimerEvent> pTimer)
 //     CallSoon(fn);
 // }
 
-folly::SemiFuture<folly::Unit> Reactor::after(folly::Duration duration)
+folly::SemiFuture<folly::Unit> Reactor::after(folly::HighResDuration duration)
 {
     auto pPromise = std::make_shared<folly::Promise<folly::Unit>>();
     CallLater(duration.count(), [pPromise] { pPromise->setValue(); });
@@ -176,7 +177,9 @@ void Reactor::Shutdown()
     {
         futures.push_back(client->Shutdown());
     }
-    folly::collectAll(futures).thenValue([this](auto /*unused*/) { this->Stop(); });
+    folly::collectAll(futures)
+        .toUnsafeFuture()
+        .thenValue([this](auto /*unused*/) { this->Stop(); });
     Start();
 }
 

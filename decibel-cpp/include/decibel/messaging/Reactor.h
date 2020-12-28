@@ -1,4 +1,4 @@
-
+// Copyright 2017, 2020. Starry, Inc. All Rights Reserved.
 #pragma once
 
 #include <unordered_set>
@@ -75,7 +75,8 @@ public:
     // virtual void add(folly::Func fn);
 
     // folly::TimeKeeper
-    virtual folly::SemiFuture<folly::Unit> after(folly::Duration duration);
+    virtual folly::SemiFuture<folly::Unit>
+    after(folly::HighResDuration duration);
 
     niceuv::ITimer* GetTimer();
 

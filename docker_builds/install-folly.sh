@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Copyright 2019. Starry, Inc. All Rights Reserved.
+# Copyright 2019, 2020. Starry, Inc. All Rights Reserved.
 set -ex
 
 CPU_COUNT=$(nproc)
@@ -7,6 +7,7 @@ CPU_COUNT=$(nproc)
 WORKDIR=${1-/var/tmp/third_party_build/tmp}
 INSTALL_PREFIX=${2-/usr/local}
 SCRIPTDIR="$(cd "$(dirname "$0")" && pwd -P)"
+PATCHESDIR="${SCRIPTDIR}/patches/folly"
 mkdir -p "${WORKDIR}"
 
 if [ -z "${FORCE_REINSTALL}" ]; then
@@ -14,7 +15,7 @@ if [ -z "${FORCE_REINSTALL}" ]; then
 fi
 
 # folly
-FOLLY_VERSION="v2019.12.09.00"
+FOLLY_VERSION="v2020.12.07.00"
 
 # shellcheck disable=SC2166
 if [ "${FORCE_REINSTALL}" -eq 1 ] || \
@@ -29,8 +30,10 @@ then
 
     pushd "${WORKDIR}/folly"
 
-    cp -r "${SCRIPTDIR}/patches/folly" patches
-    git apply patches/*
+    if [ -d "${PATCHESDIR}" ]; then
+        cp -r "${PATCHESDIR}" patches
+        git apply patches/*
+    fi
 
     mkdir -p _build
     pushd _build
