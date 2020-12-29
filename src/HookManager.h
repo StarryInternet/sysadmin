@@ -1,4 +1,4 @@
-
+// Copyright 2017, 2020. Starry, Inc. All Rights Reserved.
 #pragma once
 
 #include "HookConfig.h"
@@ -35,7 +35,9 @@ folly::Future<folly::Unit> SplitSubprocessesAcrossCores(const T& subprocs,
             {
                 futures.emplace_back(subproc->ExecuteExternalProcess());
             }
-            return folly::collect(futures).thenValue([](auto /*unused*/){ return folly::Unit(); });
+            return folly::collect(futures)
+                .toUnsafeFuture()
+                .thenValue([](auto /*unused*/){ return folly::Unit(); });
         });
     }
     return final_future;

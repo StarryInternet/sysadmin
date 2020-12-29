@@ -1,4 +1,4 @@
-
+// Copyright 2017, 2020. Starry, Inc. All Rights Reserved.
 #include <algorithm>
 
 #include <log4cxx/logger.h>
@@ -64,6 +64,7 @@ folly::Future<SubprocessHandler::Buffer> FutureSubprocess::RunSubprocess()
     folly::collectAll(pStdOutPromise->getFuture(),
                       pExitPromise->getFuture(),
                       pStdErrPromise->getFuture())
+        .toUnsafeFuture()
         .thenValue([pWrappedPromise](
             const std::tuple<folly::Try<SubprocessHandler::Buffer>,
                              folly::Try<int>,

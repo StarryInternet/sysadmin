@@ -7,7 +7,6 @@ COPY install-protobuf.sh /var/tmp
 RUN /var/tmp/install-protobuf.sh
 
 COPY install-folly.sh /var/tmp
-COPY patches/folly /var/tmp/patches/folly
 RUN /var/tmp/install-folly.sh
 
 COPY install-ampq-cpp.sh /var/tmp
