@@ -62,7 +62,7 @@ GENERATED_DIR = os.path.join('sysadmin', 'generated')
 
 setup(
     name='py-sysadmin',
-    version='1.2.9',
+    version='1.3.0',
     description='Control sysadmin',
     author='Starry Inc',
     author_email='oss@starry.com',
