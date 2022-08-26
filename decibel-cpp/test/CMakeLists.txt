@@ -27,7 +27,7 @@ target_link_libraries(libproto INTERFACE ${PROTOBUF_LIBRARIES})
 target_include_directories(libproto INTERFACE ${CMAKE_BINARY_DIR})
 
 add_executable(decibeltest ${TEST_SOURCES})
-target_require_cxx14(decibeltest)
+target_require_cxx17(decibeltest)
 target_link_libraries(decibeltest decibel gtest gmock libproto ${NN_LIBS})
 
 add_custom_target(decibel-check

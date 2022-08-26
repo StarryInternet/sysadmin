@@ -23,7 +23,7 @@ set(TEST_SOURCES
 )
 
 add_executable(sysadmintest ${TEST_SOURCES})
-target_require_cxx14(sysadmintest)
+target_require_cxx17(sysadmintest)
 target_link_libraries(sysadmintest gtest gmock libsysadmin)
 
 add_custom_command(

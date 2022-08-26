@@ -8,6 +8,11 @@ macro(target_require_cxx14 target)
     set_property(TARGET ${target} PROPERTY CXX_STANDARD_REQUIRED ON)
 endmacro(target_require_cxx14)
 
+macro(target_require_cxx17 target)
+    set_property(TARGET ${target} PROPERTY CXX_STANDARD 17)
+    set_property(TARGET ${target} PROPERTY CXX_STANDARD_REQUIRED ON)
+endmacro(target_require_cxx17)
+
 # Adds a prefix to every item in a list.
 # e.g. add_prefix(PREFIXED_LIST "prefix/" "one" "two" "three") ->
 #   PREFIXED_LIST = "prefix/one" "prefix/two" "prefix/three"

@@ -33,8 +33,8 @@ set(LIBS sysadmin-api)
 add_library(libsysadmin STATIC ${SYSADMIN_SOURCE_FILES})
 add_executable(sysadmin sysadmin.cpp)
 
-target_require_cxx14(libsysadmin)
-target_require_cxx14(sysadmin)
+target_require_cxx17(libsysadmin)
+target_require_cxx17(sysadmin)
 
 find_package(log4cxx REQUIRED)
 include_directories(${LOG4CXX_INCLUDE_DIRS})
