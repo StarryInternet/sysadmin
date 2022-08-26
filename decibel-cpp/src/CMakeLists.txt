@@ -49,7 +49,7 @@ else()
     add_library(decibel STATIC ${DECIBEL_SOURCE_FILES})
 endif()
 
-target_require_cxx14(decibel)
+target_require_cxx17(decibel)
 
 find_package(Protobuf REQUIRED)
 set(PUBLIC_LIBS ${PUBLIC_LIBS} ${PROTOBUF_LIBRARIES})
